@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Bioacoustics</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="https://cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<style>
+body {
+text-align: justify}
+</style>
+
+<h1>Bioacoustics</h1>
+
+<p>The <strong>bioacoustics</strong> package contains all the necessary R functions to read audio recordings of various formats (<em>e.g.</em>, WAV, WAC, MP3, Zero-Crossing), filter noisy files, display audio signals, detect and extract automatically acoustic features for further analysis such as species identification based on classification of animal vocalizations. This package does not provide R functions to perform classification tasks. Other packages such as <strong>randomForest</strong>, <strong>extraTrees</strong>, <strong>mclust</strong>, or <strong>keras</strong> can be used in addition with the <strong>bioacoustics</strong> package to perform these tasks. Complementary functions for audio processing in R are also available in the <strong>tuneR</strong>, <strong>monitorR</strong>, <strong>warbleR</strong>, and <strong>seewave</strong> packages.</p>
+
+<p>This package was originally built for bat bioacoustics, and thus the default arguments for all the available functions are set for bats. Users will have to set the arguments according to the group of animal vocalizations they which to study<sup>[See</sup> Table 1 for examples of extraction arguments for different species groups]. The <strong>bioacoustics</strong> package can be used to display and extract acoustic features from recordings of birds, frogs, insects, marine and other terrestrial mammals as long as their vocalizations can be recorded.</p>
+
+<p>This package is subdivided into three main components containing R functions accessible to users and internal processes that will also be defined below for the sake of clarity and ease of comprehension. The three main components with the current functions are as follow:</p>
+
+<ul>
+<li><p>Read, write, display, extract data (not yet implemented) from Zero-Crossing files: <code>read_zc</code>, <code>plot_zc</code>, <code>metadata_zc</code>, <code>write_zc</code></p></li>
+<li><p>Stand-alone tools to display, convert or resample audio recordings: <code>read_audio</code>, <code>metadata</code>, <code>resample</code>, <code>mp3_to_wav</code>, <code>spectro</code> </p></li>
+<li><p>Extract acoustic features from audio recordings: <code>fspec</code>, <code>threshold_detection</code>, <code>blob_detection</code></p></li>
+</ul>
+
+<h2>Read Zero-Crossing file</h2>
+
+<p>The <code>read_zc</code> function can read into R a Zero-Crossing file generated from various bat recorders and by the Kaleidoscope software (Wildlife Acoustics, Inc). This function is a modified version of Peter Wilson&#39;s <a href="http://www.peterwilson.id.au/Rcode/AnabatTools.R">Anabat Tools</a> (2013) and the <a href="http://users.lmi.net/corben/loader.txt">C++ source code</a> provided by Chris Corben.</p>
+
+<h2>Plot Zero-Crossing file</h2>
+
+<p>The <code>plot_zc</code> function can be used to plot the content of a Zero-Crossing file previously loaded with the <code>read_zc</code> function. This function is a modified version of Peter Wilson&#39;s <a href="http://www.peterwilson.id.au/Rcode/AnabatTools.R">Anabat Tools</a> (2013).</p>
+
+<h2>Extract Zero-Crossing file header</h2>
+
+<p>The <code>metadata_zc</code> function automatically extracts file header from a Zero-Crossing file previously loaded with the <code>read_zc</code> function.</p>
+
+<h2>Write Zero-Crossing file</h2>
+
+<p>The <code>write_zc</code> function writes or re-writes a Zero-Crossing file loaded with the <code>write_zc</code> function.</p>
+
+<h2>Read audio recording</h2>
+
+<p>The <code>read_audio</code> function loads into R mono and stereo audio recordings with MP3, Wave, or proprietary compressed WAC (from Wildlife Acoustics) formats. It can be used as a stand-alone function and is used as an helper in all the functions dealing with audio recordings. &lt;!&ndash; The <code>read_wac</code> function was built using the  necesary information from the wac2wavcmd-1.1 (provided by Wildlife Acoustics under the MIT open software license) to decode a WAC file.&ndash;&gt;</p>
+
+<h2>Extract metadata</h2>
+
+<p>The <code>metadata</code> function automatically extracts metadata encapsulated in audio recordings that were previously loaded into R with the <code>read_audio</code> function. It can also extract metadata from objects generated with the <code>threshold_detection</code> or <code>blob_detection</code> functions. GUANO metadata extraction is not yet implemented with this function. &lt;!&ndash;is a modified version of the wa_meta-1.0 Wildlife Acoustics metadata reader. The metadata encapsulated in a Wave file produced by some of their bioacoustics recorders, including (with the latest firmware) the SM2, SM2+, SM2BAT192x2, SM2BAT384, SM2BAT+, SM3, SM3BAT, EM3, EM3+ and Echo Meter Touch, can be read and extracted with this function.&ndash;&gt; </p>
+
+<h2>Resampling audio</h2>
+
+<p>The <code>resample</code> function up- or down-sample the sample rate of a given audio recording. </p>
+
+<h2>Convert WAV to MP3</h2>
+
+<p>The <code>mp3_to_wav</code> function converts MP3 to Wave files. </p>
+
+<h2>Display spectrogram</h2>
+
+<p>The <code>spectro</code> function generates a frequency spectrum representation of a time wave using the Fast Fourrier Transform (FFT).</p>
+
+<h2>Extract spectrogram data</h2>
+
+<p>The <code>fspec</code> function returns as an array the frequency spectrum representation of a time wave using the Fast Fourrier Transform (FFT). Values are expressed in decibels (dB).</p>
+
+<h2>Threshold detection</h2>
+
+<p>The <code>threshold_detection</code> function is a modified version of the Bat Bioacoustics software developed by Christopher Scott (2012). It combines several detection, filtering and audio feature extraction functions. </p>
+
+<h3>Audio event detection</h3>
+
+<p>The proposed audio event detection function is a modified spectral sum function for peak-picking, with background noise reduction and echo suppression (Scott, 2012).</p>
+
+<p>A recording typically contains broadband continuous background noise, and discrete pulses of acoustic energy expressed in dB. Any discrete portion of a recorded signal above the level of background noise in a recording is defined here as an &#39;audio event&#39;. Under this definition, an audio event may include animal vocalizations, call echoes (<em>e.g.</em>, for bats), and other noise sources either biotic (<em>e.g.</em>, stridulating insects) or abiotic (flowing water, rain, wind, and wind-induced vegetation noise).</p>
+
+<p>Audio events can be detected in a recording by its energy content, and defining a threshold rule for selecting discrete portions of the recording containing energy (dB) above a fixed threshold. The spectral energy content of a recording is typicaly revealed by applying a Short-Time Fourier Transform (STFT), a technique that slides an analysis window of fixed size through the recording. The output from the windowed FFT analysis is a discrete set of values from which the locations of audio events can be identified through simple energy thresholding and peak-picking.</p>
+
+<p>The two conventional methods of bioacoustic signal detection are the spectral peak and the spectral sum functions. For a signal \(x\) at time \(n\), \(X[n]\) is defined as its STFT, where \(|Xk[n]|\) is the spectral magnitude of the \(Kth\) FFT bin at \(n\). The spectral sum function calculates the sum of the STFT magnitudes (the total energy over the entire spectrum) at each consecutive window through the recording to create the following detection function:</p>
+
+<p><center> \(Dsum[n] = sum|Xk[n]|\) </center></p>
+
+<p>This conventional signal detection function depends on both levels of gain and background noise in the recording. This complicates the setting of a consistent detection threshold value, as recordings may be at different levels. Thus, requiring different threshold levels to detect the exact same audio events.</p>
+
+<p>To resolve this problem, the detection function should be normalised for each recording by substracting the median value over all analysis windows from each detection function data point (Skowronski &amp; Fenton, 2009). The median value is an estimate of the noise floor of the recording, and this process of median offsetting allows the use of a fixed threshold parameter, that is then independent of the recording level. However, the process of normalisation requires that the entire recording must be acquired prior to processing, ruling out real-time analysis.</p>
+
+<p>This is why the <code>threshold_detection</code> function estimates the noise floor using only past values of the recording (<em>i.e.</em>, fixed windows of previous analysis frames). Prior knowledge is therefore not required for the normalisation of the detection function, and real-time analysis remains a possibility. In addition, by estimating the noise floor locally, the function can dynamically react to changes in the magnitude of background noise winthin the recording. The size of the noise estimation window can be set using the <code>NWS</code> argument. We recommend a time window of 100 ms for short recordings (typically &lt; 1 min length) containing bat echolocation calls. However, we have found that a time window of 5000 ms is ideal in long recordings (typically &gt; 60 min length) containing bird vocalizations.</p>
+
+<p>The noise floor is estimated and subtracted independently for each spectral bin of the FFT spectrum. Environmental noise and microphone self noise is rarely white in nature (<em>i.e.</em>, equal power at all frequencies), and is typically weighted more heavily at the low end of the frequency spectrum. Frequency-specific noise substraction can attenuate the noisier low-frequency regions of the spectrum more heavily than the higher frequency and lower noise parts. This process increases the sensitivity of the audio event detection at higher frequency regions of the spectrum, as signals in those regions consequently have a higher Signal to Noise Ratio (SNR).</p>
+
+<p>A threshold function then selects candidate audio event locations from the detection function normalised outputs. This threshold function works by first marking the location at which the detection function crosses the trigger threshold level. The value (in dB above SNR) of this trigger threshold can be set using the <code>threshold</code> argument available in the <code>threshold_detection</code> function. </p>
+
+<p>If the detection function does not fall below the threshold level (in dB above SNR) after a certain audio event duration, the noise estimation is resumed from this location. This duration threshold can be set using the <code>duration_thr</code> argument. The <code>duration_thr</code> length is usually set at the maximum audio event duration of the targeted group of species. For bats in eastern Canada this parameter is set by default at 80 ms. For calls of Bicknell&#39;s Thrush (<em>Catharus bicknelii</em>), it is recommended to set it at 440 ms (see Table 1). </p>
+
+<p>Candidate audio events are subsequently filtered using the following rule: if the duration of the detected audio event is less than \(x\) milliseconds (ms) it is removed. This minimum duration filter is set with the <code>min_dur</code> argument available in the <code>threshold_detection</code> function. This duration threshold is set to help remove spurious detections caused by transient noise. For bats in eastern Canada this parameter is set by default at 1.5 ms.</p>
+
+<p>A temporal masking is also employed to reduce the influence of echoes on the detection function: an exponential decay curve is applied to the output of the detection function, which acts as an adaptive threshold. Echoes falling below the threshold do not contribute to the detection function as they are masked by the louder preceding audio event. The exponential decay curve is defined as:</p>
+
+<p><center> \(F[n]=max(D[n],a*F[n-1]+(1-a)*D[n])\) </center></p>
+
+<p>where \(F[n]\) is the threshold function, \(D[n]\) is the detection function and \(a\) is the exponential decay gain. This echo suppression function aims to reduce the false alarms caused by echoes exceeding the energy threshold that triggers the detection. Exponential Decay Gain (EDG) values &gt; 0.8 worked well in practice and are set by default at 0.996. The exponential decay gain can be set using the <code>EDG</code> argument in the <code>threshold_detection</code> function.</p>
+
+<p>The detection function \(D[n]\) is generated by first summing all spectral magnitudes in frequency bands that are greater than both their local median values, and the temporal masking threshold. This value is considered to be the audio event content as defined above. A noise estimate is then taken as the sum of all local median values. Finally, the detection function is expressed as SNR in dB as:</p>
+
+<p><center> \(SNR = 20*log10(signal/noise)\) </center></p>
+
+<p>The function uses by default a FFT window size of 256 points (which can be set using the <code>FFT_size</code> argument), with a Blackman-Harris 7-term window to reduce spectral leakage (Harris, 1978). Larger FFT windows produce finer frequency resolution (<em>i.e.</em>, an increased number of FFT bins, each with a narrower frequency span), but increase computation time and reduce temporal resolution due to Gabor&#39;s uncertainty principle (Gabor, 1946). The overlap between two consecutives FFT windows is set by default at 87.5 % (which can be set using the <code>FFT_overlap</code> argument). The <strong>bioacoustics</strong> package rely on the <a href="http://www.fftw.org/">FFTW library</a> for efficient Fourier transforms.</p>
+
+<p>The above mentioned functions has been tested and their performances evaluated on bat echolocation calls in Scott (2012). Tests on a real-world dataset of field recordings confirmed that the modified spectral sum function with background noise reduction and echo suppression outperformed the two conventional approaches (<em>i.e.</em>, spectral sum and spectral peak functions) in terms of accuracy. The noise substraction function performed well with all signal types across a broad range of thresholds, making it simpler to apply in practice where the recording content is not known a priori. As normalisation is applied in real time through local background noise substraction, the length of the recording to be analysed has no effect on function efficiency (Scott, 2012).</p>
+
+<h3>Extraction with filtering and smoothing</h3>
+
+<p>High Pass (HPF) and Low Pass filters (LPF) can be employed to reduce the amount of unwanted noise in the recording or to track particuliar audio events within a narrower frequency bandwith than the recording sampling rate. Frequencies below the HPF and above the LPF cutoff are greatly attenuated. These frequency filters can be set using the <code>HPF</code> and <code>LPF</code> arguments in the <code>threshold_detection</code> function. Note that these filters are described in this section, but are used by the <code>threshold_detection</code> function just after the conversion of the recording in the time / frequency domain using the Fast Fourier transform (FFT).</p>
+
+<p>After the recording has been filtered and that the candidate audio events have been located, a second series of functions are employed to filter, extract and smooth the audio event in the time / frequency domain. The audio event extraction function starts a search for the next FFT windows from right-to-left (start) and from left-to-right (end) from each audio event centroid (<em>i.e.</em>, location of the audio event at the peak of its maximum energy content), in search for the start and the end of the audio event, respectivelly. </p>
+
+<p><center>
+<img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-1"/>
+</center></p>
+
+<p>The audio event extraction function relies on three different thresholds to either pursue or stop its search for the next FFT window: the energy content (expressed in dB), the SNR (dB), and the angle of the next FFT window. These thresholds can be set using the <code>start_thr</code>, <code>end_thr</code>, <code>SNR_thr</code> and <code>angle_thr</code> arguments respectively. The extraction stops as soon as the next FFT falls under the minimum threshold value of any of these thresholds. Note that the start and the end thresholds can be set independently, because audio events may have a louder part before (start) or after (end) their peak of maximum energy (dB). A function is then verifying on the temporal X-axis of the recording, if an audio event has been extracted twice, and if so, it keeps only the longest audio event.</p>
+
+<p>The extracted audio event sequence is smoothed with a Kalman filtering function, whose parameters can also be set using the <code>KPE</code> (Kalman Process Error) and <code>KME</code> (Kalman Measurement Error) arguments. Another series of filtering thresholds are applied to the Kalman filtered outputs such as minimum duration (<code>min_dur</code>), maximum duration (<code>max_dur</code>), minimum time between two audio events (<code>TBE</code>). Acoustic features are then extracted from the filtered frequency (Hz) and energy (dB) outputs.</p>
+
+<h3>Acoustic features and metadata</h3>
+
+<table><thead>
+<tr>
+<th align="left">Feature</th>
+<th align="left">Unit</th>
+<th align="left">Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="left">starting_time</td>
+<td align="left">sec</td>
+<td align="left">Location of the audio event in the recording</td>
+</tr>
+<tr>
+<td align="left">duration</td>
+<td align="left">msec</td>
+<td align="left">Duration of the audio event</td>
+</tr>
+<tr>
+<td align="left">freq_max_amp</td>
+<td align="left">Hz</td>
+<td align="left">Frequency of the maximum energy of the audio event</td>
+</tr>
+<tr>
+<td align="left">freq_max</td>
+<td align="left">Hz</td>
+<td align="left">Highest frequency of the audio event</td>
+</tr>
+<tr>
+<td align="left">freq_min</td>
+<td align="left">Hz</td>
+<td align="left">Lowest frequency of the audio event</td>
+</tr>
+<tr>
+<td align="left">bandwidth</td>
+<td align="left">Hz</td>
+<td align="left">Difference between the highest (freq_max) and lowest (freq_min) frequencies</td>
+</tr>
+<tr>
+<td align="left">freq_start</td>
+<td align="left">Hz</td>
+<td align="left">Frequency at the start of the audio event</td>
+</tr>
+<tr>
+<td align="left">freq_center</td>
+<td align="left">Hz</td>
+<td align="left">Frequency at the half of the audio event</td>
+</tr>
+<tr>
+<td align="left">freq_end</td>
+<td align="left">Hz</td>
+<td align="left">Frequency at the end of the audio event</td>
+</tr>
+<tr>
+<td align="left">freq_knee</td>
+<td align="left">Hz</td>
+<td align="left">Frequency at which the slope is the steepest (knee)</td>
+</tr>
+<tr>
+<td align="left">freq_c</td>
+<td align="left">Hz</td>
+<td align="left">Frequency at which the slope is the flatest (caracteristic frequency)</td>
+</tr>
+<tr>
+<td align="left">freq_bw_knee_fc</td>
+<td align="left">Hz</td>
+<td align="left">Frequency bandwith between the knee and caracteristic frequency</td>
+</tr>
+<tr>
+<td align="left">bin_max_energy</td>
+<td align="left">Hz</td>
+<td align="left">Frequency at the maximum of energy where the slope is the flatest</td>
+</tr>
+<tr>
+<td align="left">pc_freq_max_amp</td>
+<td align="left">Hz</td>
+<td align="left">Location of the frequency with the maximum of energy</td>
+</tr>
+<tr>
+<td align="left">pc_freq_min</td>
+<td align="left">%</td>
+<td align="left">Location of the minimum frequency</td>
+</tr>
+<tr>
+<td align="left">pc_fmax</td>
+<td align="left">%</td>
+<td align="left">Location of the maximum frequency</td>
+</tr>
+<tr>
+<td align="left">pc_knee</td>
+<td align="left">%</td>
+<td align="left">Location of the frequency at which the slope is the steepest</td>
+</tr>
+<tr>
+<td align="left">temp_bw_knee_fc</td>
+<td align="left">%</td>
+<td align="left">Temporal bandwith between the knee and caracteristic frequency</td>
+</tr>
+<tr>
+<td align="left">slope</td>
+<td align="left">ms</td>
+<td align="left">Raw slope estimate (frequency bandwith against duration)</td>
+</tr>
+<tr>
+<td align="left">kalman_slope</td>
+<td align="left">Hz / ms</td>
+<td align="left">Smoothed slope estimate after Kalman filtering</td>
+</tr>
+<tr>
+<td align="left">curve_pos_start</td>
+<td align="left">Hz / ms</td>
+<td align="left">Slope estimate at the begining of the audio event</td>
+</tr>
+<tr>
+<td align="left">curve_pos_end</td>
+<td align="left">Hz / ms</td>
+<td align="left">Slope estimate at the end of the audio event</td>
+</tr>
+<tr>
+<td align="left">curve_neg</td>
+<td align="left">Hz / ms</td>
+<td align="left">Slope negative antropy</td>
+</tr>
+<tr>
+<td align="left">mid_offset</td>
+<td align="left">dB</td>
+<td align="left">Mid-offset</td>
+</tr>
+<tr>
+<td align="left">snr</td>
+<td align="left">dB</td>
+<td align="left">Signal to noise ratio</td>
+</tr>
+<tr>
+<td align="left">harmonic_distortion</td>
+<td align="left">dB</td>
+<td align="left">Level of harmonic distortion</td>
+</tr>
+<tr>
+<td align="left">smoothness</td>
+<td align="left"></td>
+<td align="left">Time / frequency regularity</td>
+</tr>
+</tbody></table>
+
+<p>The metadata embeded in the Wave file header can be extracted by setting the <code>metadata</code> argument to <code>TRUE</code>. Note that the metadata can also be extracted independently from the <code>threshold_detection</code> function by using the <code>metadata</code> function</p>
+
+<p>The detection and extraction settings used with the <code>threshold_detection</code> and <code>blob_detection</code> functions can be saved along with the metadata by setting the <code>settings</code> argument to <code>TRUE</code>.</p>
+
+<h2>Blob detection</h2>
+
+<p>The <code>blob_detection</code> function is a modified version of the Bat Classify software developed by Christopher Scott (2014). It combines several image processing, filtering and image feature extraction.</p>
+
+<h3>Audio event detection and extraction</h3>
+
+<p>A recording typically contains broadband continuous background noise, and discrete pulses of acoustic energy expressed in dB. Any discrete portion of a recorded signal above the level of background noise in a recording is defined here as an &#39;audio event&#39;. Under this definition, an audio event may include animal vocalizations, call echoes (<em>e.g.</em>, for bats), and other noise sources, either biotic (<em>e.g.</em>, stridulating insects) or abiotic (flowing water, rain, wind, and wind-induced vegetation noise).</p>
+
+<p>The spectral energy content of a recording is typicaly revealed by applying a Short-Time Fourier Transform (STFT). This technique slides an analysis window of fixed size through the recording. The output from the windowed FFT analysis is a discrete set of values from which the locations of the audio events can be identified through simple thresholding after background noise substraction (Scott, 2012). </p>
+
+<p>The <code>blob_detection</code> function uses by default a FFT window size of 256 points (can be changed using the <code>FFT_size</code> argument), with a Blackman Harris 4-term window to reduce spectral leakage (Harris, 1978). Larger FFT windows produce finer frequency resolution (an increased number of FFT bins, each with a narrower frequency span), but increase computation time and reduce temporal resolution due to Gabor&#39;s uncertainty principle (Gabor, 1946). The overlap between two consecutives FFT windows is set by default at 87.5 % (can be changed using the <code>FFT_overlap</code> argument). The <strong>bioacoustics</strong> package rely on the <a href="http://www.fftw.org/">FFTW library</a> for efficient Fourier transforms.</p>
+
+<p>FFT values are used to display the spectrogram representation of the audio event for image processing. A blur is applied to smooth the spectrogram with a Gaussian function and the level of blur can be changed using the <code>blur</code> argument. This function reduces the level of Gaussian noise in the spectrogram. The background noise is then substracted. The background substraction uses a local average of the energy spectrum intensity to estimate the amount of noise to substract from each spectrogram. This estimate is then multiplied by the value of the <code>bg_substract</code> argument. By estimating the noise floor locally, the function can dynamically react to local variations in the noise floor intensity. A contrast boost function is finally applied on the normalised spectrogram values to increase the definition of the audio event contour against the background noise. The level of contrast boost can be set with the <code>contrast_boost</code> argument.</p>
+
+<p>A &#39;blob detection&#39; algorithm is applied on the processed spectrogram to detect a Region Of Interest (ROI). This function relies on the linear-time connected component labelling algorithm described in Chang et al. (2004), and adapted from Andrew Brampton (2011). The resulting function  simultaneously labels the connected FFT values (or &#39;blob&#39;) and their contours in the spectrogram. Both external, and possibly internal contours of each blob are detected and labeled. Labeling is done in a single pass over the spectrogram, while contour points are revisited more than once and up to four times (Chang et al., 2004). Moreover, the detection function extracts a blob in a sequential order of contour points, <em>i.e.</em> a &#39;segment&#39;, which is useful in the case of animal vocalizations.</p>
+
+<p>The <code>blob_detection</code> function then discards any extracted segment which area is &lt; n pixels. This can be set using the <code>min_area</code> argument, and is set by default at 40 pixels to best extract bat echolocation calls. The values of these filtering parameters may be set differently to extract vocalizations from other group of animals. The segment is finally log-compressed, to convert magnitude into dB, before feature extraction.</p>
+
+<p>A series of filtering functions are also applied to the segments such as minimum duration (<code>min_dur</code>), maximum duration (<code>max_dur</code>), minimum time between two segments (<code>TBE</code>) to reduce the amount of unwanted noise or to track particuliar segments within a narrower temporal window. Like temporal filters, High Pass (HPF) and Low Pass frequency filters (LPF) can also be set using the <code>HPF</code> and <code>LPF</code> arguments in the <code>blob_detection</code> function. Frequencies below the HPF and above the LPF cutoff are greatly attenuated. Acoustic features are then extracted from these filtered segments.</p>
+
+<h3>Acoustic features and metadata</h3>
+
+<p>The spectral and temporal moments are extracted from the audio event contour points (called &#39;segment&#39;), and a gradient histogram is built from the sequence of frequencies (Hz) and energy (expressed in dB) stored in each pixel values (for each extracted audio event). These sequences are available to users in addition to the other acoustic features from the function&#39;s output.</p>
+
+<table><thead>
+<tr>
+<th align="left">Feature</th>
+<th align="left">Unit</th>
+<th align="left">Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="left">starting_time</td>
+<td align="left">sec</td>
+<td align="left">Location of the audio event in the recording</td>
+</tr>
+<tr>
+<td align="left">duration</td>
+<td align="left">msec</td>
+<td align="left">Duration of the audio event</td>
+</tr>
+<tr>
+<td align="left">area</td>
+<td align="left">pixels</td>
+<td align="left">Estimated area of the audio event (in pixels)</td>
+</tr>
+<tr>
+<td align="left">freq_centroid</td>
+<td align="left">Hz</td>
+<td align="left">Frequency at the centroid of the extracted audio event</td>
+</tr>
+<tr>
+<td align="left">freq_bandwith</td>
+<td align="left">Hz</td>
+<td align="left">Difference between the highest (freq_max) and lowest (freq_min) frequencies</td>
+</tr>
+<tr>
+<td align="left">freq_skew</td>
+<td align="left">Hz</td>
+<td align="left">Skewness of the frequency distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">freq_kurtosis</td>
+<td align="left">Hz</td>
+<td align="left">Kurtosis of the frequency distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">q</td>
+<td align="left">Hz</td>
+<td align="left">Centroid frequency divided by the frequency bandwith of the audio event</td>
+</tr>
+<tr>
+<td align="left">freq_gini_impurity</td>
+<td align="left">Hz</td>
+<td align="left">Degree of smoothness of the frequency distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">quant_2.5</td>
+<td align="left">Hz</td>
+<td align="left">2.5 percentile of the frequency distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">quant_25</td>
+<td align="left">Hz</td>
+<td align="left">25 percentile of the frequency distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">quant_50</td>
+<td align="left">Hz</td>
+<td align="left">50 percentile of the frequency distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">quant_75</td>
+<td align="left">Hz</td>
+<td align="left">75 percentile of the frequency distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">quant_97.5</td>
+<td align="left">Hz</td>
+<td align="left">97.5 percentile of the frequency distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">freq_bw_95_ci</td>
+<td align="left">Hz</td>
+<td align="left">Frequency bandwith between the 97.5 and the 2.5 percentiles</td>
+</tr>
+<tr>
+<td align="left">freq_bw_75_ci</td>
+<td align="left">Hz</td>
+<td align="left">Frequency bandwith between the 75 and the 25 percentiles</td>
+</tr>
+<tr>
+<td align="left">temp_centroid</td>
+<td align="left">msec</td>
+<td align="left">Time at the centroid of the extracted audio event</td>
+</tr>
+<tr>
+<td align="left">temp_bandwith</td>
+<td align="left">msec</td>
+<td align="left">Time difference between the begining and the end of the audio event</td>
+</tr>
+<tr>
+<td align="left">temp_skew</td>
+<td align="left">msec</td>
+<td align="left">Skewness of the time distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">temp_kurtosis</td>
+<td align="left">msec</td>
+<td align="left">Kurtosis of the time distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">temp_gini_impurity</td>
+<td align="left">msec</td>
+<td align="left">Degree of smoothness of the temporal distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">grad_centroid</td>
+<td align="left"></td>
+<td align="left">Gradient at the centroid of the extracted audio event</td>
+</tr>
+<tr>
+<td align="left">grad_bandwith</td>
+<td align="left"></td>
+<td align="left">Gradient difference between the begining and the end of the audio event</td>
+</tr>
+<tr>
+<td align="left">grad_skew</td>
+<td align="left"></td>
+<td align="left">Skewness of the gradient distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">grad_kurtosis</td>
+<td align="left"></td>
+<td align="left">Kurtosis of the gradient distribution of the audio event</td>
+</tr>
+<tr>
+<td align="left">grad_gini_impurity</td>
+<td align="left"></td>
+<td align="left">Degree of smoothness of the gradient distribution of the audio event</td>
+</tr>
+</tbody></table>
+
+<h2>Datasets</h2>
+
+<h3>Myotis</h3>
+
+<p>The myotis dataset is a Wave file of 10 seconds, 16 bits, mono, with an original sampling rate at 500 kHz (time expanded by 10). It contains 11 echolocation calls of bats from the <em>Myotis</em> genus. The recording was made in United-Kingdom with a D500X bat detector from Pettersson Elektronik AB.</p>
+
+<h3>zc</h3>
+
+<p>The zc dataset is a Zero-Crossing file of 16384 dots containing a sequence of 24 echolocation calls of a hoary bat (<em>Lasiurus cinereus</em>). This ZC recording was made in Gatineau Park, Quebec, eastern Canada, during the summer 2017 with a Walkabout bat detector from Titley Scientific.</p>
+
+<h2>References</h2>
+
+<blockquote>
+<p>Chang, F., Chen, C.-J., &amp; Lu, C.J. (2004). A linear-time component-labeling algorithm using contour tracing technique. computer vision and image understanding, 93(2), 206-220. <a href="https://www.iis.sinica.edu.tw/papers/fchang/1362-F.pdf">Link</a></p>
+
+<p>Gabor, D. (1946). Theory of communication. Part 1: The analysis of information. Engineers-Part III: Radio and Communication. <a href="http://ieeexplore.ieee.org/xpl/tocresult.jsp?isnumber=5298484">Link</a></p>
+
+<p>Harris, F. J. (1978). On then use of windows with the discrete for harmonic analysis Fourier transform. Proceedings of the IEEE, 66(1), 51-83. <a href="https://www.ak.tu-berlin.de/fileadmin/a0135/Unterrichtsmaterial/EDS_WS0910/Harris_1978_On_the_use_of_windows_for_harmonic_analysis_with_the_discrete_fourier_transform_IEEE.pdf">Link</a></p>
+
+<p>Scott, C. D. (2012). Automated techniques for bat echolocation call analysis.  PhD thesis. The University of Leeds Institute of Integrative and Comparative Biology, University of Leeds, Leeds, UK. 166 pages.</p>
+
+<p>Skowronski, M. D., &amp; Fenton, M. B (2009). Detecting bat calls: An analysis of automated methods. Acta Chiropterologica, 11(1), 191-203.</p>
+</blockquote>
+
+<p>Table 1. Example of detection, filtering and extraction settings with the <code>threshold_detection</code> function for eastern canadian bats and calls of Bicknell&#39;s Thrush (<em>Catharus bicknelii</em>).</p>
+
+<table><thead>
+<tr>
+<th align="left">Parameters</th>
+<th align="left">Eastern canadian bats</th>
+<th align="left">Bicknell&#39;s Thrush calls</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="left">threshold</td>
+<td align="left">14</td>
+<td align="left">12</td>
+</tr>
+<tr>
+<td align="left">time_exp</td>
+<td align="left">1</td>
+<td align="left">1</td>
+</tr>
+<tr>
+<td align="left">min_dur</td>
+<td align="left">1.5</td>
+<td align="left">140</td>
+</tr>
+<tr>
+<td align="left">max_dur</td>
+<td align="left">80</td>
+<td align="left">440</td>
+</tr>
+<tr>
+<td align="left">TBE</td>
+<td align="left">30</td>
+<td align="left">300</td>
+</tr>
+<tr>
+<td align="left">EDG</td>
+<td align="left">0.996</td>
+<td align="left">0.996</td>
+</tr>
+<tr>
+<td align="left">LPF</td>
+<td align="left">250000</td>
+<td align="left">8000</td>
+</tr>
+<tr>
+<td align="left">HPF</td>
+<td align="left">16000</td>
+<td align="left">2000</td>
+</tr>
+<tr>
+<td align="left">FFT_size</td>
+<td align="left">256</td>
+<td align="left">256</td>
+</tr>
+<tr>
+<td align="left">FFT_overlap</td>
+<td align="left">0.875</td>
+<td align="left">0.875</td>
+</tr>
+<tr>
+<td align="left">start_thr</td>
+<td align="left">40</td>
+<td align="left">25</td>
+</tr>
+<tr>
+<td align="left">end_thr</td>
+<td align="left">20</td>
+<td align="left">30</td>
+</tr>
+<tr>
+<td align="left">SNR_thr</td>
+<td align="left">10</td>
+<td align="left">10</td>
+</tr>
+<tr>
+<td align="left">angle_thr</td>
+<td align="left">40</td>
+<td align="left">45</td>
+</tr>
+<tr>
+<td align="left">duration_thr</td>
+<td align="left">80</td>
+<td align="left">440</td>
+</tr>
+<tr>
+<td align="left">NWS</td>
+<td align="left">100</td>
+<td align="left">1000</td>
+</tr>
+<tr>
+<td align="left">KPE</td>
+<td align="left">1e-05</td>
+<td align="left">1e-05</td>
+</tr>
+<tr>
+<td align="left">KME</td>
+<td align="left">1e-05</td>
+<td align="left">1e-04</td>
+</tr>
+</tbody></table>
+
+</body>
+
+</html>
