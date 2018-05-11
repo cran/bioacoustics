@@ -1,3 +1,6 @@
+[![CRAN](http://www.r-pkg.org/badges/version/bioacoustics)](https://cran.r-project.org/package=bioacoustics)
+[![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/bioacoustics)](https://cran.r-project.org/package=bioacoustics)
+
 # bioacoustics: detect and extract automatically acoustic features in audio recordings
 
 ## Description
@@ -15,7 +18,7 @@ It can be subdivided into three main components:
 
 ## Installing
 
-* Install stable version from CRAN (upcoming):
+* Install stable version from CRAN:
 ```r
 install.packages("bioacoustics")
 ```
