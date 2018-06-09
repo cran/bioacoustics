@@ -13,12 +13,14 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with This program.  If not, see <https://www.gnu.org/licenses/>.
+//  along with This program. If not, see <https://www.gnu.org/licenses/>.
 //------------------------------------------------------------------------------
 
 #ifndef LINEAR_MODEL_H
 #define LINEAR_MODEL_H
 
+#include <cmath>
+#include <numeric>
 #include <vector>
 
 inline
@@ -31,7 +33,7 @@ inline
     const auto sXY = std::inner_product(x.begin(), x.end(), y.begin(), (double)0);
     const auto mX = (double)sX / n;
     const auto mY = sY / (double)n;
-    double b = ((double)n * sXY - sX * sY) / (n * (double)sXX - pow(sX, 2));
+    double b = ((double)n * sXY - sX * sY) / (n * (double)sXX - std::pow(sX, 2));
     double a = mY - b * mX;
 
     std::vector<double> fit(x.size());

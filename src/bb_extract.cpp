@@ -13,9 +13,10 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with This program.  If not, see <https://www.gnu.org/licenses/>.
+//  along with This program. If not, see <https://www.gnu.org/licenses/>.
 //------------------------------------------------------------------------------
 
+#include <cmath>
 #include <Rcpp.h>
 #include "bb_extract.h"
 #include "bb_kalman.h"

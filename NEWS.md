@@ -1,4 +1,8 @@
-# version 0.1.1 (Patch release 2018 May 11th)
+# version 0.1.2 (Patch not released on CRAN yet)
+
+* Automate fftw installation if a suitable version was not found
+
+# version 0.1.1 (Patch released 2018 May 11th)
 
 * Minor bug fixes release
 

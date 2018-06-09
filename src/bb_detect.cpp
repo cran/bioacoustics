@@ -13,12 +13,12 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with This program.  If not, see <https://www.gnu.org/licenses/>.
+//  along with This program. If not, see <https://www.gnu.org/licenses/>.
 //------------------------------------------------------------------------------
 
 #include <cfloat>
+#include <cmath>
 #include <deque>
-#include <math.h>
 #include <vector>
 #include "fft.h"
 #include "bb_tools.h"
@@ -52,7 +52,7 @@ void detect_impl (const std::vector<int> &audio_samples,
     {
       if ((seek + j) >= 0 && (seek + j) < n_samples)
       {
-        sum_squares += pow(audio_samples.at(seek + j), 2);
+        sum_squares += std::pow(audio_samples.at(seek + j), 2);
       }
     }
     seek += step_size;
@@ -85,7 +85,7 @@ void detect_impl (const std::vector<int> &audio_samples,
     {
       if ((seek + (int)j) >= 0 && (seek + (int)j) < n_samples)
       {
-        sum_squares += pow(audio_samples.at(seek + j), 2);
+        sum_squares += std::pow(audio_samples.at(seek + j), 2);
       }
     }
 

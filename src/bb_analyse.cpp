@@ -13,10 +13,11 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with This program.  If not, see <https://www.gnu.org/licenses/>.
+//  along with This program. If not, see <https://www.gnu.org/licenses/>.
 //------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <cmath>
 #include <deque>
 #include <vector>
 #include "fft.h"
@@ -110,7 +111,7 @@ void Analyse::analyse_frame (const int &seek,
   bin_centroid = centroid(mask);
 
   // Harmonic octave above tracked
-  bin_harmonic = round(2 * bin_centroid);
+  bin_harmonic = std::round(2 * bin_centroid);
 }
 
 
