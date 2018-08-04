@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([bioacoustics], 0.1.2) dnl package name, version
+AC_INIT([bioacoustics], 0.1.3) dnl package name, version
 
 # require at least autoconf 2.61
 AC_PREREQ(2.61)
@@ -23,9 +23,24 @@ RBIN="${R_HOME}/bin/R"
 AC_PROG_CC
 AC_PROG_CPP
 
+#
+# Check if compiler supports C++11 features
+#
+AX_CXX_COMPILE_STDCXX_11()
+
 AC_MSG_NOTICE([CC: ${CC}])
 AC_MSG_NOTICE([CXX: ${CXX}])
 
+#
+# Check for OpenMP
+#
+AC_OPENMP
+LSR_OPENMP="DWITH_OPENMP=OFF"
+
+if test "x$ac_cv_prog_c_openmp" != "xunsupported"; then
+	FFTW_OPENMP="--enable-openmp"
+	LSR_OPENMP="DWITH_OPENMP=ON"
+fi
 
 #
 # fftw
@@ -100,7 +115,11 @@ if test x"${fftw_ok}" = x"no"; then
    ## Compile fftw3 source code and clean up
    AC_MSG_NOTICE([Starting to install fftw3 library to $(pwd)/fftw-${FFTW_VERSION}])
    $(cd fftw-${FFTW_VERSION}; \
-     ./configure --prefix=$(pwd) --enable-static --disable-shared CFLAGS=-fPIC > /dev/null; \
+     ./configure --prefix=$(pwd) \
+                 --enable-static \
+                 --disable-shared \
+                 ${FFTW_OPENMP} \
+                 CFLAGS=-fPIC > /dev/null; \
      make > /dev/null; \
      make install > /dev/null; )
 
@@ -186,10 +205,10 @@ if test x"${lsr_ok}" = x"no"; then
      cmake $(pwd) -Wno-dev -DCMAKE_BUILD_TYPE=Release \
                   -DCMAKE_INSTALL_PREFIX=$(pwd) \
                   -DBUILD_SHARED_LIBS=OFF \
-                  -DCMAKE_POSITION_INDEPENDENT_CODE=ON > /dev/null; \
+                  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                  -${LSR_OPENMP} > /dev/null; \
      make > /dev/null; \
      make install > /dev/null; )
-
    AC_MSG_NOTICE([Done installing soxr-lsr library])
 
    LSR_CPPFLAGS="${LSR_INCL}"

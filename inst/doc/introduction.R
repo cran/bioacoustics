@@ -111,6 +111,10 @@ c('Location of the audio event in the recording',
   ), col.names=c('Feature','Unit','Description'))
 
 
+## ----see_also, eval=FALSE------------------------------------------------
+#  # Package tutorial
+#  browseVignettes("tutorial", package = "bioacoustics")
+
 ## ---- echo=FALSE, results='asis'-----------------------------------------
 knitr::kable(as.data.frame(cbind(c('threshold','time_exp','min_dur','max_dur','TBE','EDG','LPF','HPF','FFT_size','FFT_overlap','start_thr','end_thr','SNR_thr','angle_thr','duration_thr', 'NWS', 'KPE','KME'),
 c(14,1,1.5,80,30,0.996,250000,16000,256,0.875,40,20,10,40,80,100,0.00001,0.00001),

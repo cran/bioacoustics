@@ -24,8 +24,11 @@
 #' @param max_dur numeric. Maximum duration threshold in milliseconds (ms).
 #' Extracted audio events longer than this threshold are ignored. The default setting is 80 ms.
 #'
-#' @param TBE numeric. Minimum time window between two audio events in milliseconds (ms). If the time interval between two
+#' @param TBE_min numeric. Minimum time window between two audio events in milliseconds (ms). If the time interval between two
 #' successive audio events is shorter than this window, they are ignored. The default setting is 20 ms.
+#'
+#' @param TBE_max numeric. Maximum time window between two audio events in milliseconds (ms). If the time interval between two
+#' successive audio events is longer than this window, they are ignored. The default setting is 200 ms.
 #'
 #' @param EDG numeric. Exponential Decay Gain from 0 to 1. Sets the degree of temporal masking at the end of each audio event.
 #' This filter avoids extracting noise or echoes at the end of the audio event. The default setting is 0.996.
@@ -112,7 +115,8 @@ threshold_detection <- function(wave,
                                 time_exp = 1,
                                 min_dur = 1.5,
                                 max_dur = 80,
-                                TBE = 20,
+                                TBE_min = 20,
+                                TBE_max = 100,
                                 EDG = 0.996,
                                 LPF,
                                 HPF = 16000,
@@ -152,7 +156,8 @@ threshold_detection <- function(wave,
                                            threshold = threshold,
                                            min_d = min_dur,
                                            max_d = max_dur,
-                                           TBE = TBE,
+                                           TBE_min = TBE_min,
+                                           TBE_max = TBE_max,
                                            EDG = EDG,
                                            LPF = LPF,
                                            HPF = HPF,
@@ -267,7 +272,8 @@ threshold_detection <- function(wave,
         channel = channel,
         min_dur = min_dur,
         max_dur = max_dur,
-        TBE = TBE,
+        TBE_min = TBE_min,
+        TBE_max = TBE_max,
         EDG = EDG,
         LPF = LPF,
         HPF = HPF,
