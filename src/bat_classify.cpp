@@ -35,8 +35,7 @@ Rcpp::List blob_detection_impl(const std::vector<int>& audio_samples,
                                size_t sample_rate,
                                size_t FFT_size,
                                double FFT_overlap,
-                               double TBE_min,
-                               double TBE_max,
+                               double TBE,
                                size_t HPF,
                                size_t LPF,
                                double min_d,
@@ -128,9 +127,7 @@ Rcpp::List blob_detection_impl(const std::vector<int>& audio_samples,
   {
     for (size_t i = 1; i < n_events; i++)
     {
-      if ( (((double)(min_offsets[i] - max_offsets[i - 1]) * FFT_step / ((double)height * sample_rate)) * 1000) < TBE_min ||
-           (((double)(min_offsets[i] - max_offsets[i - 1]) * FFT_step / ((double)height * sample_rate)) * 1000) > TBE_max
-          )
+      if ( (((double)(min_offsets[i] - max_offsets[i - 1]) * FFT_step / ((double)height * sample_rate)) * 1000) < TBE )
       {
         del[i - 1] = true;
         del[i] = true;

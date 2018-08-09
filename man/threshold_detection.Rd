@@ -5,8 +5,8 @@
 \title{Amplitude threshold detector above Signal to Noise Ratio (SNR)}
 \usage{
 threshold_detection(wave, threshold = 14, channel = "left",
-  time_exp = 1, min_dur = 1.5, max_dur = 80, TBE_min = 20,
-  TBE_max = 100, EDG = 0.996, LPF, HPF = 16000, FFT_size = 256,
+  time_exp = 1, min_dur = 1.5, max_dur = 80, TBE = 20,
+  EDG = 0.996, LPF, HPF = 16000, FFT_size = 256,
   FFT_overlap = 0.875, start_thr = 40, end_thr = 20, SNR_thr = 10,
   angle_thr = 40, duration_thr = 80, NWS = 100, KPE = 1e-05,
   KME = 1e-05, settings = FALSE, acoustic_feat = TRUE,
@@ -36,11 +36,8 @@ Extracted audio events shorter than this threshold are ignored. Default setting 
 \item{max_dur}{numeric. Maximum duration threshold in milliseconds (ms).
 Extracted audio events longer than this threshold are ignored. The default setting is 80 ms.}
 
-\item{TBE_min}{numeric. Minimum time window between two audio events in milliseconds (ms). If the time interval between two
+\item{TBE}{numeric. Minimum time window between two audio events in milliseconds (ms). If the time interval between two
 successive audio events is shorter than this window, they are ignored. The default setting is 20 ms.}
-
-\item{TBE_max}{numeric. Maximum time window between two audio events in milliseconds (ms). If the time interval between two
-successive audio events is longer than this window, they are ignored. The default setting is 200 ms.}
 
 \item{EDG}{numeric. Exponential Decay Gain from 0 to 1. Sets the degree of temporal masking at the end of each audio event.
 This filter avoids extracting noise or echoes at the end of the audio event. The default setting is 0.996.}
