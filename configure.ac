@@ -1,27 +1,47 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([bioacoustics], 0.1.4) dnl package name, version
+AC_INIT([bioacoustics], 0.1.5) dnl package name, version
 
-# require at least autoconf 2.61
-AC_PREREQ(2.61)
+# require at least autoconf 2.62
+AC_PREREQ(2.62)
 
 dnl Now find the compiler and compiler flags to use
-: ${R_HOME=`R RHOME`}
+: ${R_HOME=$(R RHOME)}
 if test -z "${R_HOME}"; then
   echo "could not determine R_HOME"
   exit 1
 fi
 
 RBIN="${R_HOME}/bin/R"
+RVER=$("${R_HOME}/bin/Rscript" -e 'cat((R.version)$major, (R.version)$minor, sep=".")')
 
-: ${CC=`"${RBIN}" CMD config CC`}
-: ${CXX=`"${RBIN}" CMD config CXX`}
-: ${CPP=`"${RBIN}" CMD config CPP`}
-: ${CFLAGS=`"${RBIN}" CMD config CFLAGS`}
-: ${CPPFLAGS=`"${RBIN}" CMD config CPPFLAGS`}
-: ${LDFLAGS=`"${RBIN}" CMD config LDFLAGS`}
+: ${CC=$("${RBIN}" CMD config CC)}
+: ${CPP=$("${RBIN}" CMD config CPP)}
+: ${CFLAGS=$("${RBIN}" CMD config CFLAGS)}
+: ${CPPFLAGS=$("${RBIN}" CMD config CPPFLAGS)}
+: ${LDFLAGS=$("${RBIN}" CMD config LDFLAGS)}
+
+if test [ -z "$CXX" ] ; then
+	CXX11=CXX11
+	AS_VERSION_COMPARE([${RVER}], [3.4.0], [CXX11=CXX1X], [], [])
+	CXX11=$("${RBIN}" CMD config "${CXX11}")
+fi
+
+if test [ -z "$CXX11STD" ] ; then
+	if test [ -z "$CXX1XSTD"]
+	then
+		CXX11STD=CXX11STD
+		AS_VERSION_COMPARE([${RVER}], [3.4.0], [CXX11STD=CXX1XSTD], [], [])
+		CXX11STD=$("${RBIN}" CMD config "${CXX11STD}")
+	else
+		CXX11STD=CXX1XSTD
+	fi
+fi
+
+: ${CXX="${CXX11} ${CXX11STD}"}
+
 AC_PROG_CC
-AC_PROG_CPP
+AC_PROG_CXX
 
 #
 # Check if compiler supports C++11 features
@@ -34,7 +54,7 @@ AC_MSG_NOTICE([CXX: ${CXX}])
 #
 # Check for cmake
 #
-AC_CHECK_PROG([CMAKE_FOUND], [cmake], [cmake])
+AC_CHECK_PROG([CMAKE_FOUND], [cmake], [cmake], [not found])
 
 if test x"${CMAKE_FOUND}" != x"cmake" ; then
   AC_MSG_ERROR(Could not find cmake)
@@ -43,10 +63,13 @@ fi
 #
 # Check for OpenMP
 #
+AC_LANG([C++])
+AC_OPENMP
+AC_LANG([C])
 AC_OPENMP
 LSR_OPENMP="DWITH_OPENMP=OFF"
 
-if test "x$ac_cv_prog_c_openmp" != "xunsupported"; then
+if test x"${OPENMP_CFLAGS}" != "x"; then
 	FFTW_OPENMP="--enable-openmp"
 	LSR_OPENMP="DWITH_OPENMP=ON"
 fi
@@ -83,7 +106,7 @@ else
      FFTW_LIB="-L${LIB_FFTW}/lib"
   else
     if test -n "${FFTW_CONFIG}"; then
-      fftw_lib_path=`fftw_config --libs`
+      fftw_lib_path=$(fftw_config --libs)
       FFTW_LIB="${fftw_lib_path}"
     fi
   fi
@@ -141,6 +164,10 @@ if test x"${fftw_ok}" = x"no"; then
     AC_MSG_ERROR([Could not install fftw3 library, try to install it manually?])
   fi
 
+  if [[ "$LIBS" != *"lfftw3"* ]]; then
+      LIBS="$LIBS -lfftw3"
+  fi
+
   AC_MSG_NOTICE([Done installing fftw3 library])
 
 else
@@ -179,7 +206,7 @@ else
      LSR_LIB="-L${LIB_LSR}/lib"
   else
     if test -n "${LSR_CONFIG}"; then
-      lsr_lib_path=`lsr_config --libs`
+      lsr_lib_path=$(lsr_config --libs)
       LSR_LIB="${lsr_lib_path}"
     fi
   fi
@@ -192,7 +219,7 @@ if test x"${lsr_ok}" = x"no"; then
   AC_MSG_NOTICE([Need to download and build libsoxr])
 
   ## define LSR version
-  LSR_VERSION=0.1.3.9000
+  LSR_VERSION=0.1.3.9001
 
   ## define LSR file and download URL
   LSR_TGZ="${LSR_VERSION}.tar.gz"
@@ -221,12 +248,13 @@ if test x"${lsr_ok}" = x"no"; then
   AC_MSG_NOTICE([Starting to install soxr-lsr library to $(pwd)/soxr-${LSR_VERSION}])
   $(set -e; \
     cd soxr-${LSR_VERSION}; \
+    CC="${CC}" \
     cmake $(pwd) -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=$(pwd) \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -Wno-dev \
-            -${LSR_OPENMP} > /dev/null;
+                 -DCMAKE_INSTALL_PREFIX=$(pwd) \
+                 -DBUILD_SHARED_LIBS=OFF \
+                 -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                 -Wno-dev \
+                 -${LSR_OPENMP} > /dev/null;
     make > /dev/null; \
     make install > /dev/null;
   )
@@ -237,6 +265,10 @@ if test x"${lsr_ok}" = x"no"; then
     AC_MSG_ERROR([Could not install soxr-lsr, try to install it manually?])
   fi
 
+  if [[ "$LIBS" != *"lsoxr-lsr"* ]]; then
+      LIBS="$LIBS -lsoxr-lsr -lsoxr"
+  fi
+
   AC_MSG_NOTICE([Done installing soxr-lsr library])
 
   LSR_CPPFLAGS="${LSR_INCL}"
@@ -244,20 +276,15 @@ else
    AC_MSG_NOTICE([Suitable libsoxr-lsr library found.])
 fi
 
-if [[ "$LIBS" != *"lfftw3"* ]]; then
-    LIBS="$LIBS -lfftw3"
-fi
-
-if [[ "$LIBS" != *"lsoxr-lsr"* ]]; then
-    LIBS="$LIBS -lsoxr-lsr -lsoxr"
-fi
-
 LIBS="${FFTW_LIB} ${LSR_LIB} ${LIBS}"
 CPPFLAGS="${CPPFLAGS} ${FFTW_INCL} ${LSR_INCL} -O3 -march=native -mtune=native"
+CXXFLAGS="${CXXFLAGS} ${CXX11STD}"
 
 dnl substitute CPPFLAGS and LIBS
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LIBS)
+AC_SUBST(CXXFLAGS)
+AC_SUBST(OPENMP_CXXFLAGS)
 dnl and do substitution in the src/Makevars.in
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
