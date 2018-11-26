@@ -29,7 +29,7 @@
 ## ----xeno3, message=FALSE, results='hold', eval=FALSE--------------------
 #  df3 = quer_xc(qword ='Passerella iliaca type:song cnt:"Canada"', download = FALSE)
 #  df3 = df3[df3$Vocalization_type=="song",]
-#  df3 = df3[df3$Quality=="A",]
+#  df3 = df3[df3$Quality %in% c("A", "B"),]
 #  df3 = df3[1:9,]
 #  
 #  df = rbind(df1,df2,df3)
@@ -38,6 +38,10 @@
 ## ----xeno4, eval=FALSE---------------------------------------------------
 #  # Visualize your data frame
 #  View(df)
+#  
+#  # Create data directory if not exists
+#  if(!dir.exists("data"))
+#    dir.create("data")
 #  
 #  # Download the MP3 files into your data directory
 #  quer_xc(X = df, download = TRUE, path = "data")
@@ -241,7 +245,7 @@
 
 ## ----classification1, eval=FALSE-----------------------------------------
 #  # Get the filepath for each MP3 file
-#  files <- dir("data", recursive = TRUE, full.names = TRUE, pattern = "[.]mp3")
+#  files <- dir("data", recursive = TRUE, full.names = TRUE, pattern = "[.]mp3$")
 #  
 #  # Detect and extract audio events
 #  TDs <- setNames(
@@ -251,29 +255,24 @@
 #      threshold = 12, min_dur = 140, max_dur = 440, TBE = 50, LPF = 8000,
 #      HPF = 1500, FFT_size = 512, start_thr = 30, end_thr = 20, SNR_thr = 10,
 #      angle_thr = 125, duration_thr = 400, spectro_dir = NULL, NWS = 2000,
-#      KPE = 0.00001, time_scale = 2, EDG=0.996
+#      KPE = 0.00001, time_scale = 2, EDG = 0.996
 #    ),
 #    basename(file_path_sans_ext(files))
 #  )
-#  
-#  threshold_detection("data/Passerella-iliaca-193540.mp3",
-#      threshold = 12, min_dur = 140, max_dur = 440, TBE = 50, LPF = 8000,
-#      HPF = 1500, FFT_size = 512, start_thr = 30, end_thr = 20, SNR_thr = 10,
-#      angle_thr = 125, duration_thr = 400, spectro_dir = "dewfr", NWS = 2000,
-#      KPE = 0.00001, time_scale = 2, EDG=0.996)
 #  
 #  # Keep only files with data in it
 #  TDs <- TDs[lapply(TDs, length) > 0]
 #  
 #  # Keep the extracted feature and merge in a single data frame for further analysis
-#  Event_data <- do.call("rbind", lapply(TDs, "[[", "event_data"))
-#  nrow(Event_data) # 363 audio events extracted
+#  Event_data <- do.call("rbind", c(lapply(TDs, "[[", "event_data"), list(stringsAsFactors = FALSE)))
+#  nrow(Event_data) # 355 audio events extracted
 #  
 #  # Compute the number of extracted CATBIC calls
-#  sum(grepl(Event_data$filename, pattern = "^Cat"))
+#  sum(startsWith(Event_data$filename, "Cat"))
 #  
 #  # Add a "Class" column: "CATBIC" vs. other species of birds "OTHERS"
-#  Event_data$Class <- ifelse(grepl(Event_data$filename, pattern = "^Cat"), "CATBIC", "OTHERS")
+#  classes <- as.factor(ifelse(startsWith(Event_data$filename, "Cat"), "CATBIC", "OTHERS"))
+#  Event_data <- cbind(data.frame(Class = classes), Event_data)
 #  
 #  # Get rid of the filename and time in the recording
 #  Event_data$filename <- Event_data$starting_time <- NULL
@@ -283,7 +282,6 @@
 #  # Split the data in 60% Training / 40% Test sets
 #  train <- sample(1:nrow(Event_data), round(nrow(Event_data) * .6))
 #  Train <- Event_data[train,]
-#  Train$Class <- as.factor(Train$Class)
 #  
 #  test <- setdiff(1:nrow(Event_data), train)
 #  Test <- Event_data[test,]
@@ -313,14 +311,13 @@
 #  # Run if keras is installed on your machine
 #  
 #  # Build the training set
-#  Y_train <- to_categorical(Train[,1]) # One hot encoding
-#  Y_train <- Y_train[,-1]
+#  Y_train <- to_categorical(as.integer(Train[,1]) - 1) # One hot encoding
 #  
 #  # X as matrix
 #  X_train <- as.matrix(Train[,-1])
 #  
 #  # Build the test set
-#  Y_test <- to_categorical(Test[,1])
+#  Y_test <- to_categorical(as.integer(Test[,1]) - 1)
 #  Y_test <- Y_test[,-1]
 #  X_test <- as.matrix(Test[,-1])
 #  

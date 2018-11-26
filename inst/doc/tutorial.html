@@ -249,7 +249,7 @@ df2 = df2[1:9,]
 
 <pre><code class="r">df3 = quer_xc(qword =&#39;Passerella iliaca type:song cnt:&quot;Canada&quot;&#39;, download = FALSE)
 df3 = df3[df3$Vocalization_type==&quot;song&quot;,]
-df3 = df3[df3$Quality==&quot;A&quot;,]
+df3 = df3[df3$Quality %in% c(&quot;A&quot;, &quot;B&quot;),]
 df3 = df3[1:9,]
 
 df = rbind(df1,df2,df3)
@@ -258,6 +258,10 @@ rm(df1,df2,df3)
 
 <pre><code class="r"># Visualize your data frame
 View(df)
+
+# Create data directory if not exists
+if(!dir.exists(&quot;data&quot;))
+  dir.create(&quot;data&quot;)
 
 # Download the MP3 files into your data directory
 quer_xc(X = df, download = TRUE, path = &quot;data&quot;)
@@ -539,7 +543,7 @@ getwd()
 </code></pre>
 
 <pre><code class="r"># Get the filepath for each MP3 file
-files &lt;- dir(&quot;data&quot;, recursive = TRUE, full.names = TRUE, pattern = &quot;[.]mp3&quot;)
+files &lt;- dir(&quot;data&quot;, recursive = TRUE, full.names = TRUE, pattern = &quot;[.]mp3$&quot;)
 
 # Detect and extract audio events
 TDs &lt;- setNames(
@@ -549,29 +553,24 @@ TDs &lt;- setNames(
     threshold = 12, min_dur = 140, max_dur = 440, TBE = 50, LPF = 8000, 
     HPF = 1500, FFT_size = 512, start_thr = 30, end_thr = 20, SNR_thr = 10, 
     angle_thr = 125, duration_thr = 400, spectro_dir = NULL, NWS = 2000, 
-    KPE = 0.00001, time_scale = 2, EDG=0.996
+    KPE = 0.00001, time_scale = 2, EDG = 0.996
   ),
   basename(file_path_sans_ext(files))
 )
-
-threshold_detection(&quot;data/Passerella-iliaca-193540.mp3&quot;,
-    threshold = 12, min_dur = 140, max_dur = 440, TBE = 50, LPF = 8000, 
-    HPF = 1500, FFT_size = 512, start_thr = 30, end_thr = 20, SNR_thr = 10, 
-    angle_thr = 125, duration_thr = 400, spectro_dir = &quot;dewfr&quot;, NWS = 2000, 
-    KPE = 0.00001, time_scale = 2, EDG=0.996)
 
 # Keep only files with data in it
 TDs &lt;- TDs[lapply(TDs, length) &gt; 0]
 
 # Keep the extracted feature and merge in a single data frame for further analysis
-Event_data &lt;- do.call(&quot;rbind&quot;, lapply(TDs, &quot;[[&quot;, &quot;event_data&quot;))
-nrow(Event_data) # 363 audio events extracted
+Event_data &lt;- do.call(&quot;rbind&quot;, c(lapply(TDs, &quot;[[&quot;, &quot;event_data&quot;), list(stringsAsFactors = FALSE)))
+nrow(Event_data) # 355 audio events extracted
 
 # Compute the number of extracted CATBIC calls
-sum(grepl(Event_data$filename, pattern = &quot;^Cat&quot;))
+sum(startsWith(Event_data$filename, &quot;Cat&quot;))
 
 # Add a &quot;Class&quot; column: &quot;CATBIC&quot; vs. other species of birds &quot;OTHERS&quot;
-Event_data$Class &lt;- ifelse(grepl(Event_data$filename, pattern = &quot;^Cat&quot;), &quot;CATBIC&quot;, &quot;OTHERS&quot;)
+classes &lt;- as.factor(ifelse(startsWith(Event_data$filename, &quot;Cat&quot;), &quot;CATBIC&quot;, &quot;OTHERS&quot;))
+Event_data &lt;- cbind(data.frame(Class = classes), Event_data)
 
 # Get rid of the filename and time in the recording
 Event_data$filename &lt;- Event_data$starting_time &lt;- NULL
@@ -582,7 +581,6 @@ Event_data$filename &lt;- Event_data$starting_time &lt;- NULL
 <pre><code class="r"># Split the data in 60% Training / 40% Test sets
 train &lt;- sample(1:nrow(Event_data), round(nrow(Event_data) * .6))
 Train &lt;- Event_data[train,]
-Train$Class &lt;- as.factor(Train$Class)
 
 test &lt;- setdiff(1:nrow(Event_data), train)
 Test &lt;- Event_data[test,]
@@ -623,14 +621,13 @@ Guidelines to install Keras properly in R are available <a href="https://keras.r
 <pre><code class="r"># Run if keras is installed on your machine
 
 # Build the training set
-Y_train &lt;- to_categorical(Train[,1]) # One hot encoding
-Y_train &lt;- Y_train[,-1]
+Y_train &lt;- to_categorical(as.integer(Train[,1]) - 1) # One hot encoding
 
 # X as matrix
 X_train &lt;- as.matrix(Train[,-1])
 
 # Build the test set
-Y_test &lt;- to_categorical(Test[,1])
+Y_test &lt;- to_categorical(as.integer(Test[,1]) - 1)
 Y_test &lt;- Y_test[,-1]
 X_test &lt;- as.matrix(Test[,-1])
 

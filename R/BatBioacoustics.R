@@ -230,7 +230,8 @@ threshold_detection <- function(wave,
               png_file <- file.path('spectrograms', paste0(format(Sys.time(), '%y%m%d--%H%M%S--'), bare_name, '--', i, '.png'))
               png(file.path(spectro_dir, png_file), width = (((1 - FFT_overlap) * FFT_size) / sample_rate * 1000) * nrow(spec) / time_scale)
               par(mar = rep_len(0L,4L), oma = c(.1,.1,.1,.1))
-              .spectro(data = to_dB(x = spec, ref = 2 ^ (n_bits - 1)), colors = gray.colors(25, 1, 0))
+
+
               X <- (offset[1L] + 1):(nrow(spec) - offset[2L]) / nrow(spec)
               # lines(I(audio_events[['freq_track']][[i]] * 2 / sample_rate) ~ X, col = 'red', lwd = 2)
               lines(I(audio_events[['freq_track']][[i]] / LPF) ~ X, col = 'red', lwd = 2)
@@ -239,6 +240,7 @@ threshold_detection <- function(wave,
               if (ticks)
               {
                 axis(2, at = ticks_at, tcl = .4, col = NA, col.ticks = 'black', labels = FALSE)
+                .spectro(data = to_dB(spec), colors = gray.colors(25, 1, 0))
               }
               box()
               dev.off()

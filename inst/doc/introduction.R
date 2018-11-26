@@ -113,7 +113,7 @@ c('Location of the audio event in the recording',
 
 ## ----see_also, eval=FALSE------------------------------------------------
 #  # Package tutorial
-#  browseVignettes("tutorial", package = "bioacoustics")
+#  vignette("tutorial", package = "bioacoustics")
 
 ## ---- echo=FALSE, results='asis'-----------------------------------------
 knitr::kable(as.data.frame(cbind(c('threshold','time_exp','min_dur','max_dur','TBE','EDG','LPF','HPF','FFT_size','FFT_overlap','start_thr','end_thr','SNR_thr','angle_thr','duration_thr', 'NWS', 'KPE','KME'),
