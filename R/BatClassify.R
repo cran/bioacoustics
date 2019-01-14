@@ -29,7 +29,7 @@
 #' @examples
 #' data(myotis)
 #' Output <- blob_detection(myotis, time_exp = 10, contrast_boost = 30, bg_substract = 30)
-#' Output$event_data
+#' Output$data
 #'
 #' @rdname blob_detection
 #'
@@ -40,7 +40,8 @@ blob_detection <- function(wave,
                            min_dur = 1.5,
                            max_dur = 80,
                            min_area = 40,
-                           TBE = 20,
+                           min_TBE = 20,
+                           max_TBE = 1000,
                            EDG = .9,
                            LPF,
                            HPF = 16000,
@@ -56,13 +57,19 @@ blob_detection <- function(wave,
                            time_scale = 0.1,
                            ticks = TRUE)
 {
-  if (!is(wave, 'Wave'))
+  if (is.character(wave))
     wave <- read_audio(wave)
 
-  filename <- attr(wave, 'filename')
+  filepath <- attr(wave, 'filepath')
+
+  filename <- ifelse(
+    is.null(filepath),
+    NA_character_,
+    basename(filepath)
+  )
 
   sample_rate <- slot(wave, 'samp.rate') * time_exp
-  n_bits <- slot(wave, 'bit')
+  bit_depth <- slot(wave, 'bit')
 
   if(missing(LPF))
     LPF <- sample_rate / 2
@@ -72,35 +79,33 @@ blob_detection <- function(wave,
   else
     LPF <- min(LPF, sample_rate / 2)
 
-  blobs <- blob_detection_impl(audio_samples = slot(wave, channel <- ifelse(slot(wave, 'stereo'), channel, 'left')),
-                               sample_rate = sample_rate,
-                               LPF = LPF,
-                               HPF = HPF,
-                               TBE = TBE,
-                               EDG = EDG,
-                               FFT_size = FFT_size,
-                               FFT_overlap = FFT_overlap,
-                               min_d = min_dur,
-                               max_d = max_dur,
-                               area = min_area,
-                               blur_f = blur,
-                               bg_substract = bg_substract,
-                               boost = contrast_boost)
+  blobs <- blob_detection_impl(
+    audio_samples = slot(wave, channel <- ifelse(slot(wave, 'stereo'), channel, 'left')),
+    sample_rate = sample_rate,
+    LPF = LPF,
+    HPF = HPF,
+    min_TBE = min_TBE,
+    max_TBE = max_TBE,
+    EDG = EDG,
+    FFT_size = FFT_size,
+    FFT_overlap = FFT_overlap,
+    min_d = min_dur,
+    max_d = max_dur,
+    area = min_area,
+    blur_f = blur,
+    bg_substract = bg_substract,
+    boost = contrast_boost
+  )
 
   if (length(blobs) == 0)
   {
     message(
       "No audio events found",
-      if (!is.null(filename)) paste0(" for file '", basename(filename), "'")
+      if (!is.na(filename)) paste0(" for file '", basename(filename), "'")
     )
   }
   else
   {
-    audio_events <- list( event_data = blobs[[1L]] )
-
-    if (!acoustic_feat)
-      audio_events$event_data <- audio_events$event_data[, c('starting_time', 'duration')]
-
     if ( !is.null(spectro_dir) )
     {
       if ( !dir.exists(file.path(spectro_dir, 'spectrograms')) )
@@ -121,7 +126,7 @@ blob_detection <- function(wave,
         ticks <- TRUE
       }
 
-      bare_name <- if (!is.null(filename)) tools::file_path_sans_ext(filename)
+      bare_name <- if (!is.na(filename)) tools::file_path_sans_ext(filename)
       html_file <- paste0('spectrograms--', bare_name, format(Sys.time(), '--%y%m%d--%H%M%S'), '.html')
 
       tags <- htmltools::tags
@@ -162,40 +167,62 @@ blob_detection <- function(wave,
       utils::browseURL(file.path(spectro_dir, html_file)) # Open html page on favorite browser
     }
 
+    if (!acoustic_feat)
+      blobs[[1L]] <- blobs[[1L]][, c('starting_time', 'duration')]
+
+    # Add info about filename if available
+    blobs[[1L]] <- cbind(
+      data.frame(
+        filename = basename(filename),
+        stringsAsFactors = FALSE
+      ),
+      blobs[[1L]]
+    )
+
+    output <- list( data = blobs[[1L]] )
+
     if (metadata)
     {
-      audio_events$metadata <- list(
-        sample_rate = sample_rate,
-        n_bits = n_bits
-      )
+      if (!is.null(attr(wave, "metadata")))
+      {
+        output$metadata <- metadata(wave)
+      }
+      else
+      {
+        if (!is.null(filepath))
+        {
+          output$metadata$file$sample_rate <- sample_rate
+          output$metadata$file$bit_depth <- bit_depth
+
+          if (length(guano_md <- guano_md(filepath)) > 0)
+            output$metadata$guano <- guano_md
+        }
+      }
     }
 
     if (settings)
     {
-      audio_events$settings$blob_detection <- data.frame(
+      output$metadata$settings_blob_detection <- list(
         channel = channel,
         min_dur = min_dur,
         max_dur = max_dur,
         min_area = min_area,
         LPF = LPF,
         HPF = HPF,
+        min_TBE = min_TBE,
+        max_TBE = max_TBE,
         EDG = EDG,
         FFT_size = FFT_size,
         FFT_overlap = FFT_overlap,
         blur = blur,
         bg_substract = bg_substract,
-        EDG = EDG,
         contrast_boost = contrast_boost,
         stringsAsFactors = FALSE
       )
     }
 
-    # Add info about filename if x is a file path
-    if (!is.null(filename))
-      audio_events$event_data <- cbind(data.frame(filename = filename), audio_events$event_data)
+    class(output) <- "blob_detection"
 
-    class(audio_events) <- c(class(audio_events), "blob_detection")
-
-    return(audio_events)
+    return(output)
   }
 }

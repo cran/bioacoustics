@@ -24,8 +24,11 @@
 #' @param max_dur numeric. Maximum duration threshold in milliseconds (ms).
 #' Extracted audio events longer than this threshold are ignored. The default setting is 80 ms.
 #'
-#' @param TBE numeric. Minimum time window between two audio events in milliseconds (ms). If the time interval between two
+#' @param min_TBE numeric. Minimum time window between two audio events in milliseconds (ms). If the time interval between two
 #' successive audio events is shorter than this window, they are ignored. The default setting is 20 ms.
+#'
+#' @param max_TBE numeric. Maximum time window between two audio events in milliseconds (ms). If the time interval between two
+#' successive audio events is longer than this window, they are ignored. The default setting is 1000 ms.
 #'
 #' @param EDG numeric. Exponential Decay Gain from 0 to 1. Sets the degree of temporal masking at the end of each audio event.
 #' This filter avoids extracting noise or echoes at the end of the audio event. The default setting is 0.996.
@@ -101,7 +104,7 @@
 #' @examples
 #' data(myotis)
 #' Output <- threshold_detection(myotis, time_exp = 10, HPF = 16000, LPF = 200000)
-#' Output$event_data
+#' Output$data
 #'
 #' @rdname threshold_detection
 #'
@@ -112,7 +115,8 @@ threshold_detection <- function(wave,
                                 time_exp = 1,
                                 min_dur = 1.5,
                                 max_dur = 80,
-                                TBE = 20,
+                                min_TBE = 20,
+                                max_TBE = 1000,
                                 EDG = 0.996,
                                 LPF,
                                 HPF = 16000,
@@ -126,7 +130,7 @@ threshold_detection <- function(wave,
                                 NWS = 100,
                                 KPE = 0.00001,
                                 KME = 0.00001,
-                                settings=FALSE,
+                                settings = FALSE,
                                 acoustic_feat = TRUE,
                                 metadata = FALSE,
                                 spectro_dir = NULL,
@@ -134,44 +138,53 @@ threshold_detection <- function(wave,
                                 ticks = TRUE)
 
 {
-  if (!is(wave, 'Wave'))
+  if (is.character(wave))
     wave <- read_audio(wave)
 
-  filename <- attr(wave, 'filename')
+  filepath <- attr(wave, 'filepath')
+
+  filename <- ifelse(
+    is.null(filepath),
+    NA_character_,
+    basename(filepath)
+  )
 
   sample_rate <- slot(wave, 'samp.rate') * time_exp
-  n_bits <- slot(wave, 'bit')
+  bit_depth <- slot(wave, 'bit')
 
   if(missing(LPF))
     LPF <- sample_rate / 2
   else
     LPF <- min(LPF, sample_rate / 2)
 
-  audio_events <- threshold_detection_impl(audio_samples = slot(wave, channel <- ifelse(slot(wave, 'stereo'), channel, 'left')),
-                                           sample_rate = sample_rate,
-                                           threshold = threshold,
-                                           min_d = min_dur,
-                                           max_d = max_dur,
-                                           TBE = TBE,
-                                           EDG = EDG,
-                                           LPF = LPF,
-                                           HPF = HPF,
-                                           FFT_size = FFT_size,
-                                           FFT_overlap = FFT_overlap,
-                                           dur_t = duration_thr,
-                                           snr_t = SNR_thr,
-                                           angl_t = angle_thr,
-                                           start_t = start_thr,
-                                           end_t = end_thr,
-                                           NWS = NWS,
-                                           KPE = KPE,
-                                           KME = KME)
+  event_list <- threshold_detection_impl(
+    audio_samples = slot(wave, channel <- ifelse(slot(wave, 'stereo'), channel, 'left')),
+    sample_rate = sample_rate,
+    threshold = threshold,
+    min_d = min_dur,
+    max_d = max_dur,
+    min_TBE = min_TBE,
+    max_TBE = max_TBE,
+    EDG = EDG,
+    LPF = LPF,
+    HPF = HPF,
+    FFT_size = FFT_size,
+    FFT_overlap = FFT_overlap,
+    dur_t = duration_thr,
+    snr_t = SNR_thr,
+    angl_t = angle_thr,
+    start_t = start_thr,
+    end_t = end_thr,
+    NWS = NWS,
+    KPE = KPE,
+    KME = KME
+  )
 
-  if (length(audio_events) == 0)
+  if (length(event_list) == 0)
   {
     message(
       "No audio events found",
-      if (!is.null(filename)) paste0(" for file '", basename(filename), "'")
+      if (!is.na(filename)) paste0(" for file '", basename(filename), "'")
     )
   }
   else
@@ -196,7 +209,7 @@ threshold_detection <- function(wave,
         ticks <- TRUE
       }
 
-      bare_name <- if (!is.null(filename)) tools::file_path_sans_ext(filename)
+      bare_name <- if (!is.na(filename)) tools::file_path_sans_ext(filename)
       html_file <- paste0('spectrograms--', bare_name, format(Sys.time(), '--%y%m%d--%H%M%S'), '.html')
 
       tags <- htmltools::tags
@@ -209,43 +222,44 @@ threshold_detection <- function(wave,
         ),
         tags$body(
           htmltools::tagList(
-            lapply(1:length(audio_events[['event_start']]), function(i)
-            {
-
-              offset <- .5 / (1 - FFT_overlap)
-
-              start <- max(audio_events[['event_start']][[i]] - offset * fft_step, 1)
-              end <- min(length(slot(wave, channel)), audio_events[['event_end']][[i]] + offset * fft_step)
-
-              offset <- floor( c(audio_events[['event_start']][[i]] - start, end - audio_events[['event_end']][[i]]) / fft_step )
-
-              LPF <- min(LPF, sample_rate / 2)
-              LPF_bin <- min(ceiling(LPF * FFT_size / sample_rate), FFT_size / 2 - 1)
-
-              spec <- .fspec_impl(
-                audio_samples = slot(wave, channel)[start:end], FFT_size,
-                FFT_overlap, 'blackman7', HPF_bin = 0, LPF_bin = LPF_bin,
-                FLL_bin = 0, FUL_bin = LPF_bin, rotate = TRUE
-              )
-              png_file <- file.path('spectrograms', paste0(format(Sys.time(), '%y%m%d--%H%M%S--'), bare_name, '--', i, '.png'))
-              png(file.path(spectro_dir, png_file), width = (((1 - FFT_overlap) * FFT_size) / sample_rate * 1000) * nrow(spec) / time_scale)
-              par(mar = rep_len(0L,4L), oma = c(.1,.1,.1,.1))
-
-
-              X <- (offset[1L] + 1):(nrow(spec) - offset[2L]) / nrow(spec)
-              # lines(I(audio_events[['freq_track']][[i]] * 2 / sample_rate) ~ X, col = 'red', lwd = 2)
-              lines(I(audio_events[['freq_track']][[i]] / LPF) ~ X, col = 'red', lwd = 2)
-              lgd <- legend('topright', legend = NA, inset = 0, box.col = NA)
-              text(x = lgd$rect$left + min(lgd$rect$w, 1) / 2L, y = lgd$text$y, labels = i, adj = .5)
-              if (ticks)
+            lapply(
+              1:length(event_list[['event_start']]),
+              function(i)
               {
-                axis(2, at = ticks_at, tcl = .4, col = NA, col.ticks = 'black', labels = FALSE)
+                offset <- .5 / (1 - FFT_overlap)
+
+                start <- max(event_list[['event_start']][[i]] - offset * fft_step, 1)
+                end <- min(length(slot(wave, channel)), event_list[['event_end']][[i]] + offset * fft_step)
+
+                offset <- floor( c(event_list[['event_start']][[i]] - start, end - event_list[['event_end']][[i]]) / fft_step )
+
+                LPF <- min(LPF, sample_rate / 2)
+                LPF_bin <- min(ceiling(LPF * FFT_size / sample_rate), FFT_size / 2 - 1)
+
+                spec <- .fspec_impl(
+                  audio_samples = slot(wave, channel)[start:end], FFT_size,
+                  FFT_overlap, 'blackman7', HPF_bin = 0, LPF_bin = LPF_bin,
+                  FLL_bin = 0, FUL_bin = LPF_bin, rotate = TRUE
+                )
+                png_file <- file.path('spectrograms', paste0(format(Sys.time(), '%y%m%d--%H%M%S--'), bare_name, '--', i, '.png'))
+                png(file.path(spectro_dir, png_file), width = (((1 - FFT_overlap) * FFT_size) / sample_rate * 1000) * nrow(spec) / time_scale)
+                par(mar = rep_len(0L,4L), oma = c(.1,.1,.1,.1))
+
                 .spectro(data = to_dB(spec), colors = gray.colors(25, 1, 0))
+                X <- (offset[1L] + 1):(nrow(spec) - offset[2L]) / nrow(spec)
+                # lines(I(event_list[['freq_track']][[i]] * 2 / sample_rate) ~ X, col = 'red', lwd = 2)
+                lines(I(event_list[['freq_track']][[i]] / LPF) ~ X, col = 'red', lwd = 2)
+                lgd <- legend('topright', legend = NA, inset = 0, box.col = NA)
+                text(x = lgd$rect$left + min(lgd$rect$w, 1) / 2L, y = lgd$text$y, labels = i, adj = .5)
+                if (ticks)
+                {
+                  axis(2, at = ticks_at, tcl = .4, col = NA, col.ticks = 'black', labels = FALSE)
+                }
+                box()
+                dev.off()
+                tags$img(src = png_file)
               }
-              box()
-              dev.off()
-              tags$img(src = png_file)
-            })
+            )
           )
         )
       )
@@ -254,22 +268,59 @@ threshold_detection <- function(wave,
       utils::browseURL(file.path(spectro_dir, html_file)) # Open html page on favorite browser
     }
 
+    # Convert amp_track to dB
+    event_list[['amp_track']] <- lapply(event_list[['amp_track']], to_dB, ref = 2 ^ (bit_depth - 1))
+
+    if (!acoustic_feat)
+    {
+      event_list[['amp_track']] <- NULL
+      event_list[['freq_track']] <- NULL
+      event_list$event_data <- event_list$event_data[, c('starting_time', 'duration')]
+    }
+
+    # Add info about filename if available
+    event_list$event_data <- cbind(
+      data.frame(
+        filename = basename(filename),
+        stringsAsFactors = FALSE
+      ),
+      event_list$event_data
+    )
+
+    # Convert event_start and event_end to vector
+    event_list$event_start <- unlist(event_list$event_start)
+    event_list$event_end <- unlist(event_list$event_end)
+
+    output <- list(data = event_list)
+
     if (metadata)
     {
-      audio_events$metadata <- list(
-        sample_rate = sample_rate,
-        n_bits = n_bits
-      )
+      if (!is.null(attr(wave, "metadata")))
+      {
+        output$metadata <- metadata(wave)
+      }
+      else
+      {
+        if (!is.null(filepath))
+        {
+          output$metadata$file$sample_rate <- sample_rate
+          output$metadata$file$bit_depth <- bit_depth
+
+          if (length(guano_md <- guano_md(filepath)) > 0)
+            output$metadata$guano <- guano_md
+        }
+      }
     }
 
     if (settings)
     {
-      audio_events$settings$threshold_detection <- data.frame(
+      output$metadata$settings_threshold_detection <- list(
         threshold = threshold,
         channel = channel,
         min_dur = min_dur,
         max_dur = max_dur,
-        TBE = TBE,
+        min_TBE = min_TBE,
+        max_TBE = max_TBE,
         EDG = EDG,
         LPF = LPF,
         HPF = HPF,
@@ -287,21 +338,8 @@ threshold_detection <- function(wave,
       )
     }
 
-    # Convert amp_track to dB
-    audio_events[['amp_track']] <- lapply(audio_events[['amp_track']], to_dB, ref = 2 ^ (n_bits - 1))
+    class(output) <- "threshold_detection"
 
-    if (!acoustic_feat)
-    {
-      audio_events[['amp_track']] <- NULL
-      audio_events[['freq_track']] <- NULL
-      audio_events$event_data <- audio_events$event_data[, c('starting_time', 'duration')]
-    }
-
-    # Add info about filename if available
-    if (!is.null(filename)) audio_events$event_data <- cbind(data.frame(filename = basename(filename)), audio_events$event_data)
-
-    class(audio_events) <- c(class(audio_events), "threshold_detection")
-
-    return(audio_events)
+    return(output)
   }
 }

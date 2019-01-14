@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([bioacoustics], 0.1.6) dnl package name, version
+AC_INIT([bioacoustics], 0.1.7) dnl package name, version
 
 # require at least autoconf 2.62
 AC_PREREQ(2.62)
@@ -75,6 +75,14 @@ if test x"${OPENMP_CFLAGS}" != "x"; then
 fi
 
 #
+# Check if MAKE is set, if not set to make
+#
+if test -z "${MAKE}"; then
+  MAKE = make
+fi
+
+
+#
 # fftw
 #
 
@@ -123,7 +131,7 @@ if test x"${fftw_ok}" = x"no"; then
 
   ## define FFTW file and download URL
   FFTW_TGZ="fftw-${FFTW_VERSION}.tar.gz"
-  FFTW_URL="ftp://ftp.fftw.org/pub/fftw/${FFTW_TGZ}"
+  FFTW_URL="http://fftw.org/${FFTW_TGZ}"
 
   ## C Compiler options
   FFTW_CFLAGS=
@@ -154,8 +162,8 @@ if test x"${fftw_ok}" = x"no"; then
                 --disable-shared \
                 ${FFTW_OPENMP} \
                 CFLAGS=-fPIC > /dev/null; \
-    make > /dev/null; \
-    make install > /dev/null;
+    ${MAKE} > /dev/null; \
+    ${MAKE} install > /dev/null;
   )
 
   FFTW3_INSTALL=$?
@@ -219,7 +227,7 @@ if test x"${lsr_ok}" = x"no"; then
   AC_MSG_NOTICE([Need to download and build libsoxr])
 
   ## define LSR version
-  LSR_VERSION=0.1.3.9001
+  LSR_VERSION=0.1.3.9002
 
   ## define LSR file and download URL
   LSR_TGZ="${LSR_VERSION}.tar.gz"
@@ -255,8 +263,8 @@ if test x"${lsr_ok}" = x"no"; then
                  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
                  -Wno-dev \
                  -${LSR_OPENMP} > /dev/null;
-    make > /dev/null; \
-    make install > /dev/null;
+    ${MAKE} > /dev/null; \
+    ${MAKE} install > /dev/null;
   )
 
   LSR_INSTALL=$?
