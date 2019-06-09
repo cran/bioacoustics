@@ -124,7 +124,7 @@
 #    start_thr = 25, # 25 dB threshold at the start of the audio event
 #    end_thr = 30, # 30 dB threshold at the end of the audio event
 #    SNR_thr = 10, # 10 dB SNR threshold at which the extraction of the audio event stops
-#    angle_thr = 45, # 45° of angle at which the extraction of the audio event stops
+#    angle_thr = 45, # 45Â° of angle at which the extraction of the audio event stops
 #    duration_thr = 440, # Noise estimation is resumed after 440 ms
 #    NWS = 1000, # Time window length of 1 s used for background noise estimation
 #    KPE = 1e-05, # Process Error parameter of the Kalman filter (for smoothing)
