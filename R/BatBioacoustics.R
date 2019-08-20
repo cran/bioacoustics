@@ -143,11 +143,13 @@ threshold_detection <- function(wave,
 
   filepath <- attr(wave, 'filepath')
 
-  filename <- ifelse(
-    is.null(filepath),
-    NA_character_,
-    basename(filepath)
-  )
+  filename <-
+    if (!is.null(attr(wave, 'filename')))
+      attr(wave, 'filename')
+    else if (!is.null(filepath))
+      basename(filepath)
+    else
+      NA_character_
 
   sample_rate <- slot(wave, 'samp.rate') * time_exp
   bit_depth <- slot(wave, 'bit')
@@ -186,6 +188,8 @@ threshold_detection <- function(wave,
       "No audio events found",
       if (!is.na(filename)) paste0(" for file '", basename(filename), "'")
     )
+
+    output <- list(data = NULL)
   }
   else
   {
@@ -292,54 +296,54 @@ threshold_detection <- function(wave,
     event_list$event_end <- unlist(event_list$event_end)
 
     output <- list(data = event_list)
-
-    if (metadata)
-    {
-      if (!is.null(attr(wave, "metadata")))
-      {
-        output$metadata <- metadata(wave)
-      }
-      else
-      {
-        if (!is.null(filepath))
-        {
-          output$metadata$file$sample_rate <- sample_rate
-          output$metadata$file$bit_depth <- bit_depth
-
-          if (length(guano_md <- guano_md(filepath)) > 0)
-            output$metadata$guano <- guano_md
-        }
-      }
-    }
-
-    if (settings)
-    {
-      output$metadata$settings_threshold_detection <- list(
-        threshold = threshold,
-        channel = channel,
-        min_dur = min_dur,
-        max_dur = max_dur,
-        min_TBE = min_TBE,
-        max_TBE = max_TBE,
-        EDG = EDG,
-        LPF = LPF,
-        HPF = HPF,
-        FFT_size = FFT_size,
-        FFT_overlap = FFT_overlap,
-        start_thr = start_thr,
-        end_thr = end_thr,
-        SNR_thr = SNR_thr,
-        angle_thr = angle_thr,
-        duration_thr = duration_thr,
-        NWS = NWS,
-        KPE = KPE,
-        KME = KME,
-        stringsAsFactors = FALSE
-      )
-    }
-
-    class(output) <- "threshold_detection"
-
-    return(output)
   }
+
+  if (metadata)
+  {
+    if (!is.null(attr(wave, "metadata")))
+    {
+      output$metadata <- metadata(wave)
+    }
+    else
+    {
+      if (!is.null(filepath))
+      {
+        output$metadata$file$sample_rate <- sample_rate
+        output$metadata$file$bit_depth <- bit_depth
+
+        if (length(guano_md <- guano_md(filepath)) > 0)
+          output$metadata$guano <- guano_md
+      }
+    }
+  }
+
+  if (settings)
+  {
+    output$metadata$settings_threshold_detection <- list(
+      threshold = threshold,
+      channel = channel,
+      min_dur = min_dur,
+      max_dur = max_dur,
+      min_TBE = min_TBE,
+      max_TBE = max_TBE,
+      EDG = EDG,
+      LPF = LPF,
+      HPF = HPF,
+      FFT_size = FFT_size,
+      FFT_overlap = FFT_overlap,
+      start_thr = start_thr,
+      end_thr = end_thr,
+      SNR_thr = SNR_thr,
+      angle_thr = angle_thr,
+      duration_thr = duration_thr,
+      NWS = NWS,
+      KPE = KPE,
+      KME = KME,
+      stringsAsFactors = FALSE
+    )
+  }
+
+  class(output) <- "threshold_detection"
+
+  return(output)
 }

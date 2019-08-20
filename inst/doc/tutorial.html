@@ -259,17 +259,22 @@ rm(df1,df2,df3)
 <pre><code class="r"># Visualize your data frame
 View(df)
 
-# Create data directory if not exists
-if(!dir.exists(&quot;data&quot;))
-  dir.create(&quot;data&quot;)
+# We will work in the R temp directory
+wd &lt;- tempdir()
+
+# Create a data directory if it does not exist
+data_dir &lt;- file.path(wd, &quot;data&quot;)
+
+if(!dir.exists(data_dir))
+  dir.create(data_dir)
 
 # Download the MP3 files into your data directory
-quer_xc(X = df, download = TRUE, path = &quot;data&quot;)
+quer_xc(X = df, download = TRUE, path = data_dir)
 </code></pre>
 
 <p>Now that we have recordings stored in the data directory, we can read one of them to look at its structure and content. Let&#39;s use the <code>read_audio()</code> function in <strong>bioacoustics</strong> to manually read a recording of <em>Catharus bicknelli</em>:</p>
 
-<pre><code class="r">CATBIC &lt;- read_audio(&quot;data/Catharus-bicknelli-54864.mp3&quot;)
+<pre><code class="r">CATBIC &lt;- read_audio(file.path(data_dir, &quot;Catharus-bicknelli-54864.mp3&quot;))
 CATBIC
 </code></pre>
 
@@ -277,7 +282,18 @@ CATBIC
 
 <p>Remember that you just have to divide the number of samples by the sampling rate to retrieve the duration (s) of an audio file.</p>
 
-<p>We will use the Fast Fourrier Transform (FFT) to compute a frequency-time representation of the recording called spectrogram. A spectrogram being the representation of the spectrum of frequencies in a recording as they vary through time. This representation is used to detect animal vocalizations and extract acoustic features useful for classification, with the purpose of animal identification.</p>
+<hr/>
+
+<h1>Extract GUANO metadata</h1>
+
+<p><a href="https://guano-md.org/">GUANO</a> stands for the &ldquo;Grand Unified Acoustic Notation Ontology&rdquo; and means to be a universal, extensible, open metadata format for bat (ultrasonic) and non-bat (audible, infrasonic) acoustic recordings <a href="https://github.com/riggsd/guano-r">more here</a>. GUANO format is now embeded directly in the WAV files generated from most Pettersson, Wildlife Acoustics, Titley Scientific acoustic recorders. It is possible to extract the metadata and GUANO embedded in the WAV file by using the <code>metadata()</code> function.</p>
+
+<pre><code class="r">metadata(CATBIC)
+</code></pre>
+
+<p><br></p>
+
+<p>Now that we have explored a WAV file, we will use the Fast Fourrier Transform (FFT) to compute a frequency-time representation of the recording, called a spectrogram. A spectrogram being the representation of the spectrum of frequencies in a recording as they vary through time. This representation, although not optimal, is still commonly used to detect animal vocalizations and extract acoustic features useful for classification with the purpose of animal identification.</p>
 
 <hr/>
 
@@ -378,7 +394,8 @@ TD &lt;- threshold_detection(
   time_exp = 1, # Time expansion factor of 1. Only needed for bat recordings.
   min_dur = 140, # Minimum duration threshold of 140 milliseconds (ms)
   max_dur = 440, # Maximum duration threshold of 440 ms
-  TBE = 10, # Minimum time window between two audio events of 10 milliseconds
+  min_TBE = 10, # Minimum time window between two audio events of 10 milliseconds
+  max_TBE = 5000, # Maximum time window between two audio events, here 5 seconds
   EDG = 0.996, # Temporal masking with Exponential Decay Gain from 0 to 1
   LPF = 10000, # Low-Pass Filter of 10 kHz
   HPF = 1000, # High-Pass Filter of 1 kHz
@@ -397,40 +414,40 @@ TD &lt;- threshold_detection(
   settings = FALSE, #  Save on a list the above parameters set with this function
   acoustic_feat = TRUE, # Extracts the acoustic and signal quality parameters 
   metadata = FALSE, # Extracts on a list the metadata embedded with the Wave file
-  spectro_dir = &quot;./Spectros&quot;, # Directory where to save the spectrograms
+  spectro_dir = file.path(tempdir(), &quot;Spectros&quot;), # Directory where to save the spectrograms
   time_scale = 1, # Time resolution of 2 ms for spectrogram display
   ticks = TRUE # Tick marks and their intervals are drawn on the y-axis (frequencies) 
 ) 
 
 # Get the number of extracted audio events
-nrow(TD$event_data)
+nrow(TD$data$event_data)
 </code></pre>
 
-<p>Let the HTML page open with the 56 spectrograms (each representing an extracted audio event). These settings will be our benchmark for the number of audio events that can be extracted with the <code>threshold_detection()</code> function. In the following exercise, you will try to reach or beat this number by exploring different combinations of parameters for each argument of the function.</p>
+<p>Let the HTML page open with the 57 spectrograms (each representing an extracted audio event). These settings will be our benchmark for the number of audio events that can be extracted with the <code>threshold_detection()</code> function. In the following exercise, you will try to reach or beat this number by exploring different combinations of parameters for each argument of the function.</p>
 
 <pre><code class="r"># Let&#39;s try various settings, starting with 1024 FFT size instead of 256.
 TD &lt;- threshold_detection(
-  CATBIC, threshold = 12, time_exp = 1, min_dur = 140, max_dur = 440, TBE = 10, 
-  EDG = 0.996, LPF = 10000, HPF = 1000, FFT_size = 1024, FFT_overlap = 0.875,
-  start_thr = 25, end_thr = 30, SNR_thr = 10, angle_thr = 45, duration_thr = 440,
-  NWS = 1000, KPE = 1e-05, KME = 1e-04, settings = FALSE, acoustic_feat = TRUE,
-  metadata = FALSE, spectro_dir = &quot;./Spectros&quot;, time_scale = 1, 
+  CATBIC, threshold = 12, time_exp = 1, min_dur = 140, max_dur = 440, 
+  min_TBE = 10, max_TBE = 5000, EDG = 0.996, LPF = 10000, HPF = 1000, 
+  FFT_size = 1024, FFT_overlap = 0.875, start_thr = 25, end_thr = 30, 
+  SNR_thr = 10, angle_thr = 45, duration_thr = 440, NWS = 1000, 
+  KPE = 1e-05, KME = 1e-04, settings = FALSE, acoustic_feat = TRUE,
+  metadata = FALSE, spectro_dir = file.path(tempdir(), &quot;Spectros&quot;), time_scale = 1, 
   ticks = c(1000, 10000, 1000) # Tick marks from 1 to 10 kHz with 1 kHz interval
 ) 
 
 # Take a look at the spectrograms and compare them with the previous extraction.
-nrow(TD$event_data) # Only six audio events!
+nrow(TD$data$event_data) # Only three audio events!
 </code></pre>
 
-<p>We will play with various detection thresholds: end_thr, SNR_thr, angle_thr, KPE and KME parameters. Try to reach 65 spectrograms extracted with a contour (<em>i.e.</em>, Kalman curve) that best matches the audio event (answer below). The FFT size will be set at 512 samples.</p>
+<p>We will play with various detection thresholds: end_thr, SNR_thr, angle_thr, KPE and KME parameters. Try to reach 66 spectrograms extracted with a contour (<em>i.e.</em>, Kalman curve) that best matches the audio event (answer below). The FFT size will be set at 256 samples.</p>
 
-<pre><code class="r">CATBIC &lt;- read_audio(&quot;data/Catharus-bicknelli-54864.mp3&quot;)
+<pre><code class="r">CATBIC &lt;- read_audio(file.path(data_dir, &quot;Catharus-bicknelli-54864.mp3&quot;))
 TD &lt;- threshold_detection(
-  CATBIC, threshold = 12, time_exp = 1, min_dur = 140, max_dur = 440, TBE = 10, 
-  EDG = 0.996, LPF = 10000, HPF = 1000, FFT_size = 512, FFT_overlap = 0.875,
-  start_thr = 25, end_thr = 30, SNR_thr = 10, angle_thr = 125, duration_thr = 440,
-  NWS = 1000, KPE = 1e-05, KME = 1e-05, settings = FALSE, acoustic_feat = TRUE,
-  metadata = FALSE
+  CATBIC, threshold = 12, time_exp = 1, min_dur = 140, max_dur = 440, min_TBE = 10, 
+  max_TBE = Inf, EDG = 0.996, LPF = 10000, HPF = 1000, FFT_size = 256, FFT_overlap = 0.875, 
+  start_thr = 22, end_thr = 30, SNR_thr = 10, angle_thr = 125, duration_thr = 440, NWS = 1000,
+  KPE = 1e-05, KME = 1e-05, settings = FALSE, acoustic_feat = TRUE, metadata = FALSE
 )
 </code></pre>
 
@@ -439,17 +456,17 @@ TD &lt;- threshold_detection(
 <pre><code class="r"># Acoustic features are stored in a data frame called event_data,
 # stored by order of detection.
 
-View(TD$event_data) # Contains the filename and the time of detection in the 
-                    # recording, and 26 extracted features.
+View(TD$data$event_data) # Contains the filename and the time of detection in the 
+                         # recording, and 26 extracted features.
 </code></pre>
 
 <p>The location (in number of samples) of the audio event in the recording is saved in a list. </p>
 
 <pre><code class="r"># Start and end of the 5th extracted audio event (in samples)
-c(TD$event_start[[5]], TD$event_end[[5]])
+c(TD$data$event_start[[5]], TD$data$event_end[[5]])
 
 # Remember you just have to divide by the sample rate to retrieve the time (s)
-c(TD$event_start[[5]], TD$event_end[[5]]) / slot(CATBIC, &quot;samp.rate&quot;)
+c(TD$data$event_start[[5]], TD$data$event_end[[5]]) / slot(CATBIC, &quot;samp.rate&quot;)
 </code></pre>
 
 <p>The amplitude (dB) and frequency (Hz) tracks (or bins) are also saved in a list. These can be used to build your own acoustic features.</p>
@@ -457,10 +474,10 @@ c(TD$event_start[[5]], TD$event_end[[5]]) / slot(CATBIC, &quot;samp.rate&quot;)
 <pre><code class="r">par(mar = c(1,1, 1, 1), oma = c(1, 1, 1, 1))
 
 # Amplitude track of the 5th audio event
-plot(TD$amp_track[[5]], type = &quot;l&quot;)
+plot(TD$data$amp_track[[5]], type = &quot;l&quot;)
 
 # Frequency track of the 5th audio event
-plot(TD$freq_track[[5]], type = &quot;l&quot;)
+plot(TD$data$freq_track[[5]], type = &quot;l&quot;)
 </code></pre>
 
 <p>The whole energy and frequency content can also be used to classify audio events instead of using acoustic features that may result in a loss of information. We will get there soon, but first, let&#39;s discover another detection function, here applied on echolocation calls of bats.</p>
@@ -483,7 +500,7 @@ BD &lt;- blob_detection(
   min_dur = 1.5, # Minimum duration threshold of 1.5 milliseconds (ms)
   max_dur = 80, # Maximum duration threshold of 80 ms
   min_area = 40, # minimum number of 40 pixels in the blob
-  TBE = 20, # Minimum time window between two audio events of 20 milliseconds
+  min_TBE = 20, # Minimum time window between two audio events of 20 milliseconds
   EDG = 0.996, # Temporal masking with Exponential Decay Gain from 0 to 1
   LPF = slot(myotis, &quot;samp.rate&quot;) * 10 / 2, # Low-Pass Filter at the Nyquist frequency
   HPF = 16000, # High-Pass Filter of 16 kHz
@@ -497,13 +514,13 @@ BD &lt;- blob_detection(
   settings = FALSE, #  Save on a list the above parameters set with this function
   acoustic_feat = TRUE, # Extracts the acoustic and signal quality parameters 
   metadata = FALSE, # Extracts on a list the metadata embedded with the Wave file
-  spectro_dir = &quot;./Spectros&quot;, # HTML page with spectrograms by order of detection 
+  spectro_dir = file.path(tempdir(), &quot;Spectros&quot;), # HTML page with spectrograms by order of detection 
   time_scale = 0.1, # Time resolution of 2 ms for spectrogram display
   ticks = TRUE # Tick marks and their intervals are drawn on y-axis (frequencies)
 ) 
 
 # Get the number of extracted audio events
-nrow(BD$event_data)
+nrow(BD$data$event_data)
 </code></pre>
 
 <p>Do not close the HTML page and tune the FFT size at 512. Let&#39;s play with the blur, contrast boost and background subtraction parameters to retrieve a number of 10 extracted echolocation calls.</p>
@@ -511,17 +528,17 @@ nrow(BD$event_data)
 <pre><code class="r"># Let&#39;s try various settings, starting with 512 FFT size instead of 256.
 BD &lt;- blob_detection(
   myotis, time_exp = 10, FFT_size = 512, settings = FALSE, acoustic_feat = TRUE,
-  metadata = FALSE, spectro_dir = &quot;./Spectros&quot;, time_scale = 0.1, ticks = TRUE
+  metadata = FALSE, spectro_dir = file.path(tempdir(), &quot;Spectros&quot;), time_scale = 0.1, ticks = TRUE
 ) 
 
 # Take a look at the spectrograms and compare them with the previous extraction.
-nrow(BD$event_data) # Only 7 audio events!
+nrow(BD$data$event_data) # Only 6 audio events!
 </code></pre>
 
 <p>Let&#39;s take a look at the extracted audio features. All the features are described and explained in the package vignette.</p>
 
 <pre><code class="r"># Acoustic features
-head(BD$event_data) 
+head(BD$data)
 </code></pre>
 
 <p>This data frame is, for now, the only available set of acoustic features with the <code>blob_detection()</code> function. However, it combines well with the <code>fspec()</code> to make image analysis.</p>
@@ -538,31 +555,27 @@ head(BD$event_data)
 
 <p>Our target audio events are calls of <em>Catharus-bicknelli</em>. We will use the threshold detector previously configured for this species (see section 4.1.1).</p>
 
-<pre><code class="r"># Make sure you have the right path to the 27 MP3 recordings
-getwd()
-</code></pre>
-
 <pre><code class="r"># Get the filepath for each MP3 file
-files &lt;- dir(&quot;data&quot;, recursive = TRUE, full.names = TRUE, pattern = &quot;[.]mp3$&quot;)
+files &lt;- dir(data_dir, recursive = TRUE, full.names = TRUE, pattern = &quot;[.]mp3$&quot;)
 
 # Detect and extract audio events
 TDs &lt;- setNames(
   lapply(
     files,
     threshold_detection,
-    threshold = 12, min_dur = 140, max_dur = 440, TBE = 50, LPF = 8000, 
-    HPF = 1500, FFT_size = 512, start_thr = 30, end_thr = 20, SNR_thr = 10, 
-    angle_thr = 125, duration_thr = 400, spectro_dir = NULL, NWS = 2000, 
-    KPE = 0.00001, time_scale = 2, EDG = 0.996
+    threshold = 12, min_dur = 140, max_dur = 440, min_TBE = 50, max_TBE = Inf,
+    LPF = 8000, HPF = 1500, FFT_size = 256, start_thr = 30, end_thr = 20, 
+    SNR_thr = 10, angle_thr = 125, duration_thr = 400, spectro_dir = NULL,
+    NWS = 2000, KPE = 0.00001, time_scale = 2, EDG = 0.996
   ),
   basename(file_path_sans_ext(files))
 )
 
 # Keep only files with data in it
-TDs &lt;- TDs[lapply(TDs, length) &gt; 0]
+TDs &lt;- TDs[lapply(TDs, function(x) length(x$data)) &gt; 0]
 
 # Keep the extracted feature and merge in a single data frame for further analysis
-Event_data &lt;- do.call(&quot;rbind&quot;, c(lapply(TDs, &quot;[[&quot;, &quot;event_data&quot;), list(stringsAsFactors = FALSE)))
+Event_data &lt;- do.call(&quot;rbind&quot;, c(lapply(TDs, function(x) x$data$event_data), list(stringsAsFactors = FALSE)))
 nrow(Event_data) # 355 audio events extracted
 
 # Compute the number of extracted CATBIC calls
@@ -619,6 +632,7 @@ Guidelines to install Keras properly in R are available <a href="https://keras.r
 <p>Let&#39;s now explore a ConvNet approach available on Keras. We will follow the approach of <a href="https://arxiv.org/pdf/1710.00886.pdf">Hatami et al. (2017)</a> to analyze time series as images with 2D ConvNets. The difference is that we will only perform max pooling at the last layer before activation and add batch normalization with dropouts at each layer.</p>
 
 <pre><code class="r"># Run if keras is installed on your machine
+library(keras)
 
 # Build the training set
 Y_train &lt;- to_categorical(as.integer(Train[,1]) - 1) # One hot encoding
