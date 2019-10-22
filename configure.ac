@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([bioacoustics], 0.2.1) dnl package name, version
+AC_INIT([bioacoustics], 0.2.2) dnl package name, version
 
 # require at least autoconf 2.62
 AC_PREREQ(2.62)
@@ -16,9 +16,7 @@ RBIN="${R_HOME}/bin/R"
 RVER=$("${R_HOME}/bin/Rscript" -e 'cat((R.version)$major, (R.version)$minor, sep=".")')
 
 : ${CC=$("${RBIN}" CMD config CC)}
-: ${CPP=$("${RBIN}" CMD config CPP)}
 : ${CFLAGS=$("${RBIN}" CMD config CFLAGS)}
-: ${CPPFLAGS=$("${RBIN}" CMD config CPPFLAGS)}
 : ${LDFLAGS=$("${RBIN}" CMD config LDFLAGS)}
 
 if test [ -z "$CXX" ] ; then
@@ -227,7 +225,7 @@ if test x"${lsr_ok}" = x"no"; then
   AC_MSG_NOTICE([Need to download and build libsoxr])
 
   ## define LSR version
-  LSR_VERSION=0.1.3.9002
+  LSR_VERSION=0.1.3.9003
 
   ## define LSR file and download URL
   LSR_TGZ="${LSR_VERSION}.tar.gz"
@@ -279,18 +277,15 @@ if test x"${lsr_ok}" = x"no"; then
 
   AC_MSG_NOTICE([Done installing soxr-lsr library])
 
-  LSR_CPPFLAGS="${LSR_INCL}"
 else
    AC_MSG_NOTICE([Suitable libsoxr-lsr library found.])
 fi
 
 LIBS="${FFTW_LIB} ${LSR_LIB} ${LIBS}"
-CPPFLAGS="${CPPFLAGS} ${FFTW_INCL} ${LSR_INCL}"
-CFLAGS="${CFLAGS} -O3 -march=native -mtune=native"
-CXXFLAGS="${CXXFLAGS} ${CXX11STD}"
+CFLAGS="${CFLAGS} ${FFTW_INCL} ${LSR_INCL} -O3 -march=native -mtune=native"
+CXXFLAGS="${CXXFLAGS} ${FFTW_INCL} ${LSR_INCL} ${CXX11STD}"
 
-dnl substitute CPPFLAGS and LIBS
-AC_SUBST(CPPFLAGS)
+dnl substitute C/CXXFLAGS and LIBS
 AC_SUBST(CFLAGS)
 AC_SUBST(LIBS)
 AC_SUBST(CXXFLAGS)
