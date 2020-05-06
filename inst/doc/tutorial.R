@@ -1,4 +1,4 @@
-## ----install_packages, message=FALSE, eval=FALSE-------------------------
+## ----install_packages, message=FALSE, eval=FALSE------------------------------
 #  install.packages("bioacoustics")
 #  
 #  # The bioacoustics package may also be installed from GitHub using devtools as follows:
@@ -8,25 +8,25 @@
 #  install.packages("warbleR")
 #  install.packages("randomForest")
 
-## ----load_packages, message=FALSE, eval=FALSE----------------------------
+## ----load_packages, message=FALSE, eval=FALSE---------------------------------
 #  # Load the packages
 #  library(warbleR)
 #  library(bioacoustics)
 #  library(tools)
 #  library(randomForest)
 
-## ----xeno1, message=FALSE, eval=FALSE------------------------------------
+## ----xeno1, message=FALSE, eval=FALSE-----------------------------------------
 #  df1 = quer_xc(qword ='Catharus bicknelli type:call cnt:"United States"', download = FALSE)
 #  df1 = df1[df1$Vocalization_type=="call",]
 #  df1 = df1[df1$Quality=="A",]
 #  df1 = df1[1:9,]
 
-## ----xeno2, message=FALSE, results='hold', eval=FALSE--------------------
+## ----xeno2, message=FALSE, results='hold', eval=FALSE-------------------------
 #  df2 = quer_xc(qword ='Setophaga magnolia type:song cnt:"Canada"', download = FALSE)
 #  df2 = df2[df2$Quality=="A",]
 #  df2 = df2[1:9,]
 
-## ----xeno3, message=FALSE, results='hold', eval=FALSE--------------------
+## ----xeno3, message=FALSE, results='hold', eval=FALSE-------------------------
 #  df3 = quer_xc(qword ='Passerella iliaca type:song cnt:"Canada"', download = FALSE)
 #  df3 = df3[df3$Vocalization_type=="song",]
 #  df3 = df3[df3$Quality %in% c("A", "B"),]
@@ -35,7 +35,7 @@
 #  df = rbind(df1,df2,df3)
 #  rm(df1,df2,df3)
 
-## ----xeno4, eval=FALSE---------------------------------------------------
+## ----xeno4, eval=FALSE--------------------------------------------------------
 #  # Visualize your data frame
 #  View(df)
 #  
@@ -51,16 +51,16 @@
 #  # Download the MP3 files into your data directory
 #  quer_xc(X = df, download = TRUE, path = data_dir)
 
-## ----read_audio, eval=FALSE----------------------------------------------
+## ----read_audio, eval=FALSE---------------------------------------------------
 #  CATBIC <- read_audio(file.path(data_dir, "Catharus-bicknelli-54864.mp3"))
 #  CATBIC
 
-## ----metadata,eval=FALSE-------------------------------------------------
+## ----metadata,eval=FALSE------------------------------------------------------
 #  
 #  metadata(CATBIC)
 #  
 
-## ----spectro0, eval=FALSE------------------------------------------------
+## ----spectro0, eval=FALSE-----------------------------------------------------
 #  # Set plot margins to 0
 #  par(mar = c(0, 0, 0, 0), oma = c(0, 0, 0, 0))
 #  
@@ -70,12 +70,12 @@
 #  temp_slice <- c(from = 1, to = 10) # in seconds
 #  spectro(CATBIC, tlim = temp_slice, FFT_size = 512, ticks_y = ticks)
 
-## ----help, eval=FALSE----------------------------------------------------
+## ----help, eval=FALSE---------------------------------------------------------
 #  # Access the arguments of the spectro function
 #  ?spectro
 #  ?fspec
 
-## ----spectro1, eval=FALSE------------------------------------------------
+## ----spectro1, eval=FALSE-----------------------------------------------------
 #  # Set plot margins to 0
 #  par(mar = c(0, 0, 0, 0), oma = c(0, 0, 0, 0))
 #  
@@ -91,7 +91,7 @@
 #  # You can display the spectrogram with image()
 #  image(spec_mx, xaxt = "n", yaxt = "n")
 
-## ----filter, eval=FALSE--------------------------------------------------
+## ----filter, eval=FALSE-------------------------------------------------------
 #  temp_slice <- c(from = 2.5, to = 3.5)
 #  freq_slice <- c(from = 1500, to = 20000)
 #  spec_o <- fspec(CATBIC, tlim = temp_slice, flim = freq_slice, FFT_size = 512, rotate = TRUE)
@@ -112,11 +112,11 @@
 #  image(spec_o, xaxt="n", yaxt="n")
 #  image(spec_f, xaxt="n", yaxt="n")
 
-## ----threshold_help, eval=FALSE------------------------------------------
+## ----threshold_help, eval=FALSE-----------------------------------------------
 #  # Access the arguments of the threshold_detection function
 #  ?threshold_detection
 
-## ----threshold1, eval=FALSE----------------------------------------------
+## ----threshold1, eval=FALSE---------------------------------------------------
 #  # Set each argument according to the targeted audio events
 #  TD <- threshold_detection(
 #    CATBIC, # Either a path to an audio file (see ?read_audio), or a Wave object
@@ -152,7 +152,7 @@
 #  # Get the number of extracted audio events
 #  nrow(TD$data$event_data)
 
-## ----threshold2, eval=FALSE----------------------------------------------
+## ----threshold2, eval=FALSE---------------------------------------------------
 #  # Let's try various settings, starting with 1024 FFT size instead of 256.
 #  TD <- threshold_detection(
 #    CATBIC, threshold = 12, time_exp = 1, min_dur = 140, max_dur = 440,
@@ -167,7 +167,7 @@
 #  # Take a look at the spectrograms and compare them with the previous extraction.
 #  nrow(TD$data$event_data) # Only three audio events!
 
-## ----threshold3, eval=FALSE----------------------------------------------
+## ----threshold3, eval=FALSE---------------------------------------------------
 #  CATBIC <- read_audio(file.path(data_dir, "Catharus-bicknelli-54864.mp3"))
 #  TD <- threshold_detection(
 #    CATBIC, threshold = 12, time_exp = 1, min_dur = 140, max_dur = 440, min_TBE = 10,
@@ -176,21 +176,21 @@
 #    KPE = 1e-05, KME = 1e-05, settings = FALSE, acoustic_feat = TRUE, metadata = FALSE
 #  )
 
-## ----features1, eval=FALSE-----------------------------------------------
+## ----features1, eval=FALSE----------------------------------------------------
 #  # Acoustic features are stored in a data frame called event_data,
 #  # stored by order of detection.
 #  
 #  View(TD$data$event_data) # Contains the filename and the time of detection in the
 #                           # recording, and 26 extracted features.
 
-## ----features2, eval=FALSE-----------------------------------------------
+## ----features2, eval=FALSE----------------------------------------------------
 #  # Start and end of the 5th extracted audio event (in samples)
 #  c(TD$data$event_start[[5]], TD$data$event_end[[5]])
 #  
 #  # Remember you just have to divide by the sample rate to retrieve the time (s)
 #  c(TD$data$event_start[[5]], TD$data$event_end[[5]]) / slot(CATBIC, "samp.rate")
 
-## ----features3, eval=FALSE-----------------------------------------------
+## ----features3, eval=FALSE----------------------------------------------------
 #  par(mar = c(1,1, 1, 1), oma = c(1, 1, 1, 1))
 #  
 #  # Amplitude track of the 5th audio event
@@ -199,11 +199,11 @@
 #  # Frequency track of the 5th audio event
 #  plot(TD$data$freq_track[[5]], type = "l")
 
-## ----blob0, eval=FALSE---------------------------------------------------
+## ----blob0, eval=FALSE--------------------------------------------------------
 #  # Access the arguments of the blob_detection function
 #  ?blob_detection
 
-## ----blob1, eval=FALSE---------------------------------------------------
+## ----blob1, eval=FALSE--------------------------------------------------------
 #  # Use the bat recording stored in the package
 #  data(myotis)
 #  
@@ -236,7 +236,7 @@
 #  # Get the number of extracted audio events
 #  nrow(BD$data$event_data)
 
-## ----blob2, eval=FALSE---------------------------------------------------
+## ----blob2, eval=FALSE--------------------------------------------------------
 #  # Let's try various settings, starting with 512 FFT size instead of 256.
 #  BD <- blob_detection(
 #    myotis, time_exp = 10, FFT_size = 512, settings = FALSE, acoustic_feat = TRUE,
@@ -246,11 +246,11 @@
 #  # Take a look at the spectrograms and compare them with the previous extraction.
 #  nrow(BD$data$event_data) # Only 6 audio events!
 
-## ----blobfeat1, eval=FALSE-----------------------------------------------
+## ----blobfeat1, eval=FALSE----------------------------------------------------
 #  # Acoustic features
 #  head(BD$data)
 
-## ----classification1, eval=FALSE-----------------------------------------
+## ----classification1, eval=FALSE----------------------------------------------
 #  # Get the filepath for each MP3 file
 #  files <- dir(data_dir, recursive = TRUE, full.names = TRUE, pattern = "[.]mp3$")
 #  
@@ -284,7 +284,7 @@
 #  # Get rid of the filename and time in the recording
 #  Event_data$filename <- Event_data$starting_time <- NULL
 
-## ----classification2, eval=FALSE-----------------------------------------
+## ----classification2, eval=FALSE----------------------------------------------
 #  # Split the data in 60% Training / 40% Test sets
 #  train <- sample(1:nrow(Event_data), round(nrow(Event_data) * .6))
 #  Train <- Event_data[train,]
@@ -313,7 +313,7 @@
 #  # To look at the predictions
 #  head(predict(rf, Test[,-1], type = "prob"))
 
-## ----keras1, eval=FALSE--------------------------------------------------
+## ----keras1, eval=FALSE-------------------------------------------------------
 #  # Run if keras is installed on your machine
 #  library(keras)
 #  
@@ -371,7 +371,7 @@
 #  score <- mod0 %>% evaluate(X_test, Y_test, batch_size = 32)
 #  score
 
-## ----keras2, eval=FALSE--------------------------------------------------
+## ----keras2, eval=FALSE-------------------------------------------------------
 #  # Look at predictions and build a confusion matrix
 #  Pred <- as.factor(predict_classes(mod0, X_test, batch_size = 32, verbose = 1))
 #  table(Y_test[,2], Pred)

@@ -1,4 +1,4 @@
-## ---- echo=FALSE,message=FALSE,warning=FALSE-----------------------------
+## ---- echo=FALSE,message=FALSE,warning=FALSE----------------------------------
 library(bioacoustics)
 data(myotis)
 Img <- fspec(myotis, tlim = c(2.65, 2.8), rotate = TRUE)
@@ -31,7 +31,7 @@ arrows(
 
 rm(myotis,Img)
 
-## ---- echo=FALSE, results='asis'-----------------------------------------
+## ---- echo=FALSE, results='asis'----------------------------------------------
 knitr::kable(
   as.data.frame(
     cbind(
@@ -74,7 +74,7 @@ knitr::kable(
   col.names = c('Feature','Unit','Description')
 )
 
-## ---- echo=FALSE, results='asis'-----------------------------------------
+## ---- echo=FALSE, results='asis'----------------------------------------------
 knitr::kable(
   as.data.frame(
     cbind(
@@ -113,11 +113,11 @@ knitr::kable(
   col.names = c('Feature','Unit','Description')
 )
 
-## ----see_also, eval=FALSE------------------------------------------------
+## ----see_also, eval=FALSE-----------------------------------------------------
 #  # Package tutorial
 #  vignette("tutorial", package = "bioacoustics")
 
-## ---- echo=FALSE, results='asis'-----------------------------------------
+## ---- echo=FALSE, results='asis'----------------------------------------------
 knitr::kable(
   as.data.frame(
     cbind(

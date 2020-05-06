@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([bioacoustics], 0.2.2) dnl package name, version
+AC_INIT([bioacoustics], 0.2.3) dnl package name, version
 
 # require at least autoconf 2.62
 AC_PREREQ(2.62)
@@ -36,7 +36,9 @@ if test [ -z "$CXX11STD" ] ; then
 	fi
 fi
 
-: ${CXX="${CXX11} ${CXX11STD}"}
+: ${CXXPICFLAGS=$("${RBIN}" CMD config CXXPICFLAGS)}
+: ${CXX="${CXX11} ${CXX11STD} ${CXXPICFLAGS}"}
+
 
 AC_PROG_CC
 AC_PROG_CXX
@@ -52,7 +54,8 @@ AC_MSG_NOTICE([CXX: ${CXX}])
 #
 # Check for cmake
 #
-AC_CHECK_PROG([CMAKE_FOUND], [cmake], [cmake], [not found])
+CMAKE_SEARCH_PATH="${PATH}:/Applications/CMake.app/Contents/bin"
+AC_CHECK_PROG([CMAKE_FOUND], [cmake], [cmake], [not found], ${CMAKE_SEARCH_PATH})
 
 if test x"${CMAKE_FOUND}" != x"cmake" ; then
   AC_MSG_ERROR(Could not find cmake)

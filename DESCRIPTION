@@ -2,7 +2,7 @@ Package: bioacoustics
 Type: Package
 Title: Analyse Audio Recordings and Automatically Extract Animal
         Vocalizations
-Version: 0.2.2
+Version: 0.2.3
 Authors@R: c(person("Jean", "Marchal", email = "jean.marchal@wavx.ca", role = c("aut","cre")),
              person("Francois", "Fabianek", email = "francois.fabianek@wavx.ca", role = "aut"),
              person("Christopher", "Scott", role = "aut"),
@@ -28,10 +28,10 @@ Suggests: knitr, rmarkdown
 URL: https://github.com/wavx/bioacoustics/
 BugReports: https://github.com/wavx/bioacoustics/issues/
 NeedsCompilation: yes
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 VignetteBuilder: knitr
 Biarch: TRUE
-Packaged: 2019-10-22 16:57:43 UTC; jean
+Packaged: 2020-05-06 14:47:12 UTC; jean
 Author: Jean Marchal [aut, cre],
   Francois Fabianek [aut],
   Christopher Scott [aut],
@@ -41,4 +41,4 @@ Author: Jean Marchal [aut, cre],
   Wildlife Acoustics, inc. [ctb, cph] (Read WAC files, original C code),
   WavX, inc. [cph]
 Repository: CRAN
-Date/Publication: 2019-10-22 17:50:03 UTC
+Date/Publication: 2020-05-06 15:30:02 UTC
