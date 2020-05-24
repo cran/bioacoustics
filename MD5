@@ -1,6 +1,6 @@
-3c0649c28897f740bf7c2f5ce1db693f *DESCRIPTION
+6e5f597fa457035a4e921e3dcab60246 *DESCRIPTION
 74ae171598a723f9521d0719c7233ae2 *NAMESPACE
-34bdfd8cd9fed3e4c08727a6103b2910 *NEWS.md
+1328c953127227b2445e4cd99b505d71 *NEWS.md
 49c48efc1b3dfdbc0b8383b0bea9b8fe *R/BatBioacoustics.R
 8221d8a7c97ba135e917dcd944ae7867 *R/BatClassify.R
 7520b29836be2588e9b0040445cf3ef0 *R/RcppExports.R
@@ -20,8 +20,8 @@ cc088d71753c681eac64345915f597b9 *R/spectro.R
 57ff6ed80337c51fd1186a93bf20a4fb *README.md
 4c06884d43b7b0f3e64ce0e3099edad5 *build/vignette.rds
 794cc5144627652ff93404ed491b95c0 *cleanup
-94a80b57ba970f091fda64e33087457a *configure
-932b5324231a6ef4bd0d543242c814e2 *configure.ac
+25a125c0f7dc7361c7013a104e6b38a3 *configure
+a16d9b9ceb9d210a89ef4e709b0fb998 *configure.ac
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 b5c9989801ad5e4a8c8c6342614b6d93 *data/myotis.rda
 dd7482f5a9ca1142f62f9689f6ba0c1e *data/zc.rda

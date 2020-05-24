@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([bioacoustics], 0.2.3) dnl package name, version
+AC_INIT([bioacoustics], 0.2.4) dnl package name, version
 
 # require at least autoconf 2.62
 AC_PREREQ(2.62)
@@ -256,6 +256,7 @@ if test x"${lsr_ok}" = x"no"; then
   ## Compile libsoxr source code and clean up
   AC_MSG_NOTICE([Starting to install soxr-lsr library to $(pwd)/soxr-${LSR_VERSION}])
   $(set -e; \
+    PATH=${CMAKE_SEARCH_PATH}
     cd soxr-${LSR_VERSION}; \
     CC="${CC}" \
     cmake $(pwd) -DCMAKE_BUILD_TYPE=Release \
