@@ -2,7 +2,7 @@ Package: bioacoustics
 Type: Package
 Title: Analyse Audio Recordings and Automatically Extract Animal
         Vocalizations
-Version: 0.2.5
+Version: 0.2.7
 Authors@R: c(person("Jean", "Marchal", email = "jean.marchal@wavx.ca", role = c("aut","cre")),
              person("Francois", "Fabianek", email = "francois.fabianek@wavx.ca", role = "aut"),
              person("Christopher", "Scott", role = "aut"),
@@ -10,6 +10,7 @@ Authors@R: c(person("Jean", "Marchal", email = "jean.marchal@wavx.ca", role = c(
              person("David", "Riggs", role = c("ctb", "cph"), email = "driggs@myotisoft.com", comment = "Read GUANO metadata, original R code"),
              person("Peter", "Wilson", role = c("ctb", "cph"), email = "peter@peterwilson.id.au", comment = "Read ZC files, original R code"),
              person(family = "Wildlife Acoustics, inc.", role = c("ctb", "cph"), comment = "Read WAC files, original C code"),
+             person("Jordan", "Biserkov", role = "ctb"),
              person(family = "WavX, inc.", role = "cph"))
 Maintainer: Jean Marchal <jean.marchal@wavx.ca>
 Description: Contains all the necessary tools to process audio recordings of
@@ -31,7 +32,7 @@ NeedsCompilation: yes
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Biarch: TRUE
-Packaged: 2021-01-05 15:07:53 UTC; jean
+Packaged: 2021-10-13 21:37:15 UTC; jean
 Author: Jean Marchal [aut, cre],
   Francois Fabianek [aut],
   Christopher Scott [aut],
@@ -39,6 +40,7 @@ Author: Jean Marchal [aut, cre],
   David Riggs [ctb, cph] (Read GUANO metadata, original R code),
   Peter Wilson [ctb, cph] (Read ZC files, original R code),
   Wildlife Acoustics, inc. [ctb, cph] (Read WAC files, original C code),
+  Jordan Biserkov [ctb],
   WavX, inc. [cph]
 Repository: CRAN
-Date/Publication: 2021-01-05 18:50:02 UTC
+Date/Publication: 2021-10-14 04:30:13 UTC

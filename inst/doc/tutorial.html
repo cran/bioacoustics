@@ -236,18 +236,18 @@ library(randomForest)
 
 <p>We will filter only &ldquo;A&rdquo; quality recordings, then, pick up only the first nine, and merge all the metadata into a single &ldquo;df&rdquo; data frame. This data frame will be used to download MP3 files in your working directory directly from Xeno-Canto with the <code>quer_xc()</code> function:</p>
 
-<pre><code class="r">df1 = quer_xc(qword =&#39;Catharus bicknelli type:call cnt:&quot;United States&quot;&#39;, download = FALSE)
+<pre><code class="r">df1 = query_xc(qword =&#39;Catharus bicknelli type:call cnt:&quot;United States&quot;&#39;, download = FALSE)
 df1 = df1[df1$Vocalization_type==&quot;call&quot;,]
 df1 = df1[df1$Quality==&quot;A&quot;,]
 df1 = df1[1:9,]
 </code></pre>
 
-<pre><code class="r">df2 = quer_xc(qword =&#39;Setophaga magnolia type:song cnt:&quot;Canada&quot;&#39;, download = FALSE)
+<pre><code class="r">df2 = query_xc(qword =&#39;Setophaga magnolia type:song cnt:&quot;Canada&quot;&#39;, download = FALSE)
 df2 = df2[df2$Quality==&quot;A&quot;,]
 df2 = df2[1:9,]
 </code></pre>
 
-<pre><code class="r">df3 = quer_xc(qword =&#39;Passerella iliaca type:song cnt:&quot;Canada&quot;&#39;, download = FALSE)
+<pre><code class="r">df3 = query_xc(qword =&#39;Passerella iliaca type:song cnt:&quot;Canada&quot;&#39;, download = FALSE)
 df3 = df3[df3$Vocalization_type==&quot;song&quot;,]
 df3 = df3[df3$Quality %in% c(&quot;A&quot;, &quot;B&quot;),]
 df3 = df3[1:9,]

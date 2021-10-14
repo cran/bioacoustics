@@ -16,18 +16,18 @@
 #  library(randomForest)
 
 ## ----xeno1, message=FALSE, eval=FALSE-----------------------------------------
-#  df1 = quer_xc(qword ='Catharus bicknelli type:call cnt:"United States"', download = FALSE)
+#  df1 = query_xc(qword ='Catharus bicknelli type:call cnt:"United States"', download = FALSE)
 #  df1 = df1[df1$Vocalization_type=="call",]
 #  df1 = df1[df1$Quality=="A",]
 #  df1 = df1[1:9,]
 
 ## ----xeno2, message=FALSE, results='hold', eval=FALSE-------------------------
-#  df2 = quer_xc(qword ='Setophaga magnolia type:song cnt:"Canada"', download = FALSE)
+#  df2 = query_xc(qword ='Setophaga magnolia type:song cnt:"Canada"', download = FALSE)
 #  df2 = df2[df2$Quality=="A",]
 #  df2 = df2[1:9,]
 
 ## ----xeno3, message=FALSE, results='hold', eval=FALSE-------------------------
-#  df3 = quer_xc(qword ='Passerella iliaca type:song cnt:"Canada"', download = FALSE)
+#  df3 = query_xc(qword ='Passerella iliaca type:song cnt:"Canada"', download = FALSE)
 #  df3 = df3[df3$Vocalization_type=="song",]
 #  df3 = df3[df3$Quality %in% c("A", "B"),]
 #  df3 = df3[1:9,]

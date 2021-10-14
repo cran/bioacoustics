@@ -1,3 +1,12 @@
+# version 0.2.7
+
+* Fix broken web links.
+
+# version 0.2.6
+
+* Fix a warning in write_zc(). Reported by @abfleishman.  
+* Fix autoconf deprecated function
+
 # version 0.2.5
 
 * Delete the code that is no longer maintained
