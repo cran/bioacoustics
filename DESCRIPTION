@@ -2,7 +2,7 @@ Package: bioacoustics
 Type: Package
 Title: Analyse Audio Recordings and Automatically Extract Animal
         Vocalizations
-Version: 0.2.7
+Version: 0.2.8
 Authors@R: c(person("Jean", "Marchal", email = "jean.marchal@wavx.ca", role = c("aut","cre")),
              person("Francois", "Fabianek", email = "francois.fabianek@wavx.ca", role = "aut"),
              person("Christopher", "Scott", role = "aut"),
@@ -32,7 +32,7 @@ NeedsCompilation: yes
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Biarch: TRUE
-Packaged: 2021-10-13 21:37:15 UTC; jean
+Packaged: 2022-02-08 14:49:10 UTC; jean
 Author: Jean Marchal [aut, cre],
   Francois Fabianek [aut],
   Christopher Scott [aut],
@@ -43,4 +43,4 @@ Author: Jean Marchal [aut, cre],
   Jordan Biserkov [ctb],
   WavX, inc. [cph]
 Repository: CRAN
-Date/Publication: 2021-10-14 04:30:13 UTC
+Date/Publication: 2022-02-08 15:30:10 UTC

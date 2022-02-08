@@ -1,6 +1,6 @@
-112b640c19638acf10043125925fc3bb *DESCRIPTION
+6719f1de265bff7182fde8a2f7a1187a *DESCRIPTION
 a4ffd49426db549fbb7ea49eb4022c04 *NAMESPACE
-541621529680602671e83b9b6b80201a *NEWS.md
+68fe6db85a027d581e10f4cb06c28a7e *NEWS.md
 49c48efc1b3dfdbc0b8383b0bea9b8fe *R/BatBioacoustics.R
 8221d8a7c97ba135e917dcd944ae7867 *R/BatClassify.R
 61251922e170fd2f3548d275fc78c30a *R/RcppExports.R
@@ -19,8 +19,8 @@ b1d7657ca0325dfaf370e06489b9a2a3 *R/write_zc.R
 4297550acc29f09b6158f5bd0f361a1f *README.md
 1f8ff095b840550ec88699c78fca1d9f *build/vignette.rds
 794cc5144627652ff93404ed491b95c0 *cleanup
-db68f24f3db744f3b973a0fb5baced77 *configure
-1d2e98d8ea0a2388d83a63b442b25cde *configure.ac
+f9ede86f8a2fdbf58fac04d29fdf4a31 *configure
+c1c233a34729fb2effc72a6418d9b2e8 *configure.ac
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 b5c9989801ad5e4a8c8c6342614b6d93 *data/myotis.rda
 dd7482f5a9ca1142f62f9689f6ba0c1e *data/zc.rda
@@ -28,8 +28,8 @@ c174ff8210fe7e50ad9319d7314bd369 *inst/doc/introduction.R
 27235762293248ed462b75a450ba202e *inst/doc/introduction.Rmd
 53aff31f2e97184d85da13b8f7d1bf18 *inst/doc/introduction.html
 6fe37e25da92a6af86cce9b8b3ad7bd7 *inst/doc/tutorial.R
-0feb5408e46ebb51a1d4a284d48bbd0c *inst/doc/tutorial.Rmd
-f6d2bb045a468fa7027299853c95eeaf *inst/doc/tutorial.html
+26091b8b9029be06b6436ad2810121c9 *inst/doc/tutorial.Rmd
+803f8cbfb2c556e1ca86493ebd643ce6 *inst/doc/tutorial.html
 77a097db233f55143f60812295375465 *inst/extdata/recording.mp3
 df952eb0a881107d649e50e1327e4596 *inst/extdata/recording.wav
 7967b17d6a570908bae62594919d173a *inst/extdata/recording_20170716_230503.wac
@@ -55,6 +55,7 @@ d0150e7e65f75bea0a742393e0f3063b *man/read_zc.Rd
 04eac4677993ac118580b464e870a829 *man/to_dB.Rd
 9e7064b6f4e275f0313818dd183b962e *man/write_zc.Rd
 adb38781891b36bc8d642c4a668ee7fc *src/Makevars.in
+c014979e9259f850c8f7b47b290540e7 *src/Makevars.ucrt
 e29837ffec031ec13d15ed1d9c6e6090 *src/Makevars.win
 24b5a42d08ec6181be78ac260dc2684c *src/RcppExports.cpp
 42ccd8e1e84ea37cc3eb48eba0f5d5d6 *src/bat_bioacoustics.cpp
@@ -85,4 +86,4 @@ de85457906ecb950233e77ee503dd6ca *src/read_wac.h
 49bf28ff3cf33fd5e4cb3f2b6090766d *src/tools.h
 d16ce8eed2326652e877cee6eda1953d *tools/winlibs.R
 27235762293248ed462b75a450ba202e *vignettes/introduction.Rmd
-0feb5408e46ebb51a1d4a284d48bbd0c *vignettes/tutorial.Rmd
+26091b8b9029be06b6436ad2810121c9 *vignettes/tutorial.Rmd
